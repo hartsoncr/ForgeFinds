@@ -5,30 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ForgeFinds | Daily Deals</title>
   <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/hartsoncr/ForgeFinds/main/favicon.png">
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
+
   <style>
     :root {
       --forge-ember: #FF400D;
       --molten-red: #D7260D;
       --steel-gray: #4D5D4D;
-      --obstalt: #1A1A1A;
+      --black: #000000;
     }
-
-    <!-- Simple Visitor Counter -->
-<p style="font-size:0.8rem;color:#555;">Visitor Count: 
-  <img src="https://hitwebcounter.com/counter/counter.php?page=1234567&style=0006&nbdigits=5&type=page&initCount=0" title="Visitors" Alt="counter" border="0">
-</p>
 
     body {
       font-family: 'Poppins', Arial, sans-serif;
       margin: 0;
       padding: 0;
-      background: var(--obstalt);
+      background: var(--black);
       color: #f5f5f5;
       text-align: center;
     }
 
     header {
-      background: linear-gradient(180deg, #111, #1a1a1a);
+      background: linear-gradient(180deg, #000, #111);
       padding: 40px 20px;
       border-bottom: 3px solid var(--forge-ember);
     }
@@ -76,7 +81,7 @@
     }
 
     footer {
-      background: #0d0d0d;
+      background: #000;
       font-size: 0.85rem;
       padding: 20px;
       color: #777;
