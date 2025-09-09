@@ -2,21 +2,27 @@
   {
     "title": "⚡ 78% OFF MagSafe Power Bank! (5000mAh)",
     "description": "Slim, snap-on power for iPhone MagSafe. USB-C fast charging, great for travel, and priced under $20 while the sale lasts.",
-    "image": "https://m.media-amazon.com/images/I/61v0m+eU5NL._AC_SX679_.jpg",
-    "link": "https://amzn.to/3JUso6i",
-    "source": "Amazon • Limited time"
+    "price_info": "$11.99 (was $54.99)",
+    "store": "Amazon",
+    "image_url": "https://m.media-amazon.com/images/I/61v0m+eU5NL._AC_SX679_.jpg",
+    "affiliate_url": "https://amzn.to/3JUso6i",
+    "tags": ["magsafe", "charger", "iphone", "power-bank"],
+    "category": "chargers",
+    "created_at": "2025-09-09T22:00:00Z",
+    "expires_at": "2025-09-30",
+    "slug": "magsafe-power-bank"
   },
   {
-  "title": "⚡ 60W Super Fast USB-C Charger",
-  "description": "Compact, travel-ready wall charger with 60W fast charging for phones, laptops, and tablets. Originally $89.99, now only $19.99!",
-  "price_info": "$19.99 (was $89.99)",
-  "store": "Amazon",
-  "image_url": "https://m.media-amazon.com/images/I/81kbq3oSpML._AC_SX679_.jpg",
-  "affiliate_url": "https://amzn.to/3JMY2To",
-  "tags": ["charger", "usb-c", "power", "fast-charging"],
-  "category": "chargers",
-  "created_at": "2025-09-09T23:00:00Z",
-  "expires_at": "2025-09-30",
-  "slug": "60w-super-fast-charger"
-}
+    "title": "⚡ 60W Super Fast USB-C Charger",
+    "description": "Compact, travel-ready wall charger with 60W fast charging for phones, laptops, and tablets. Originally $89.99, now only $19.99!",
+    "price_info": "$19.99 (was $89.99)",
+    "store": "Amazon",
+    "image_url": "https://m.media-amazon.com/images/I/81kbq3oSpML._AC_SX679_.jpg",
+    "affiliate_url": "https://amzn.to/3JMY2To",
+    "tags": ["charger", "usb-c", "power", "fast-charging"],
+    "category": "chargers",
+    "created_at": "2025-09-09T23:00:00Z",
+    "expires_at": "2025-09-30",
+    "slug": "60w-super-fast-charger"
+  }
 ]
