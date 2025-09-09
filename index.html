@@ -4,70 +4,59 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ForgeFinds — Daily Tech Deals</title>
-  <meta name="description" content="ForgeFinds by HartForge: hand-picked tech deals, price drops, and alerts." />
+  <meta name="description" content="ForgeFinds: hand-picked tech deals, price drops, and alerts." />
 
   <link rel="icon" href="favicon.png" type="image/png" />
   <link rel="apple-touch-icon" href="favicon.png" />
-
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --bg:#000;
-      --panel:#111214;
-      --text:#e6e6e6;
-      --muted:#9aa0a6;
-      --accent:#ff4d00;
-      --accent-2:#d72600;
-      --ring:#272a2f;
+      --bg:#000; --panel:#111214; --text:#e6e6e6; --muted:#9aa0a6;
+      --accent:#ff4d00; --accent2:#d72600; --ring:#272a2f;
     }
     *{box-sizing:border-box}
     html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
     a{color:inherit;text-decoration:none}
     img{max-width:100%;display:block}
-
     .wrap{max-width:1100px;margin:0 auto;padding:24px 16px}
     header{display:flex;align-items:center;gap:16px;margin:6px 0 18px}
     .logo{width:52px;height:52px;border-radius:12px;background:#0f0f10;border:1px solid var(--ring);display:grid;place-items:center;overflow:hidden}
-    .logo img{width:90%;height:auto}
+    .logo img{width:90%}
     .brand{display:flex;flex-direction:column;gap:4px}
     .brand h1{font:700 28px/1 "Bebas Neue",sans-serif;margin:0;letter-spacing:.5px;color:var(--accent);text-shadow:0 0 10px rgba(255,77,0,.25)}
     .brand .tag{font-size:14px;color:var(--muted)}
-
-    .socials{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
-    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;border:1px solid var(--ring);background:linear-gradient(#151618,#0f1012);color:#fff;font-weight:600;font-size:14px;transition:transform .12s ease,border-color .12s ease}
+    nav.socials{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;border:1px solid var(--ring);background:linear-gradient(#151618,#0f1012);color:#fff;font-weight:600;font-size:14px;transition:transform .12s,border-color .12s}
     .btn:hover{transform:translateY(-1px);border-color:var(--accent)}
     .btn svg{width:18px;height:18px;fill:currentColor}
-
-    .section-title{margin:24px 0 10px;font:700 22px/1 "Bebas Neue",sans-serif;letter-spacing:.5px;color:#fff}
-
+    .subnav{display:flex;gap:10px;margin:0 0 14px}
+    .subnav a{padding:8px 12px;border:1px solid var(--ring);border-radius:10px;background:#0f0f10}
+    h2.section{margin:16px 0 8px;font:700 22px/1 "Bebas Neue",sans-serif;color:#fff}
     .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
     .card{grid-column:span 12;background:linear-gradient(180deg,#121316,#0b0c0e);border:1px solid var(--ring);border-radius:16px;overflow:hidden}
     @media(min-width:700px){.card{grid-column:span 6}}
     @media(min-width:1000px){.card{grid-column:span 4}}
-
     .card img.thumb{width:100%;height:200px;object-fit:cover;background:#0f0f10;border-bottom:1px solid var(--ring)}
-    .card-body{padding:14px}
+    .body{padding:14px}
     .title{margin:0 0 6px;font:700 18px/1.25 Poppins,sans-serif}
     .desc{margin:0 0 12px;color:var(--muted);font-size:14px;line-height:1.5}
     .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .deal-btn{background:linear-gradient(to right,var(--accent),var(--accent-2));border:none;color:#fff;padding:10px 12px;border-radius:12px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;font-size:12px;box-shadow:0 0 18px rgba(255,77,0,.25)}
+    .deal-btn{background:linear-gradient(to right,var(--accent),var(--accent2));border:none;color:#fff;padding:10px 12px;border-radius:12px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;font-size:12px;box-shadow:0 0 18px rgba(255,77,0,.25)}
     .deal-btn:hover{filter:brightness(1.06)}
     .mini{color:var(--muted);font-size:12px}
-
     footer{margin:28px 0 10px;padding:16px;border-top:1px solid var(--ring);color:var(--muted);font-size:12px}
+    .empty{border:1px dashed var(--ring);border-radius:14px;padding:16px;text-align:center;color:var(--muted)}
   </style>
 </head>
 <body>
   <div class="wrap">
-
     <header>
       <div class="logo"><img src="forgefinds-logo.png" alt="ForgeFinds logo" onerror="this.style.display='none'"></div>
       <div class="brand">
         <h1>FORGEFINDS</h1>
         <div class="tag">Forging the best tech deals daily.</div>
       </div>
-
       <nav class="socials">
         <a class="btn" href="https://www.youtube.com/@ForgeFinds" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24"><path d="M23.5 6.2a4.5 4.5 0 0 0-3.2-3.2C18.5 2.5 12 2.5 12 2.5s-6.5 0-8.3.5A4.5 4.5 0 0 0 .5 6.2a47.4 47.4 0 0 0 0 11.6 4.5 4.5 0 0 0 3.2 3.2c1.8.5 8.3.5 8.3.5s6.5 0 8.3-.5a4.5 4.5 0 0 0 3.2-3.2 47.4 47.4 0 0 0 0-11.6ZM9.75 15.02V8.98L15.5 12l-5.75 3.02Z"/></svg>
@@ -80,29 +69,59 @@
       </nav>
     </header>
 
-    <h2 class="section-title">Latest Deals</h2>
+    <div class="subnav">
+      <a href="browse.html">Browse all deals</a>
+    </div>
 
-    <section class="grid">
-
-      <!-- DEAL CARD 1 -->
-      <article class="card">
-        <img class="thumb" src="https://m.media-amazon.com/images/I/61v0m+eU5NL._AC_SX679_.jpg" alt="MagSafe 5000mAh Power Bank">
-        <div class="card-body">
-          <h3 class="title">⚡ 78% OFF MagSafe Power Bank (5000mAh)</h3>
-          <p class="desc">Slim, snap-on power for iPhone MagSafe. USB-C fast charging, great for travel, and priced under $20 while the sale lasts.</p>
-          <div class="actions">
-            <a class="deal-btn" href="https://amzn.to/3JUso6i" target="_blank" rel="sponsored noopener">Grab Deal</a>
-            <span class="mini">Amazon • Limited time</span>
-          </div>
-        </div>
-      </article>
-
-    </section>
+    <h2 class="section">Latest Deals</h2>
+    <section id="deal-grid" class="grid"><div class="empty">Loading your top 3 deals…</div></section>
 
     <footer>
-      <strong>Disclosure:</strong> As an Amazon Associate, ForgeFinds earns from qualifying purchases. Prices and availability may change without notice.
+      <strong>Disclosure:</strong> As an Amazon Associate, ForgeFinds earns from qualifying purchases.
+      Prices and availability may change without notice.
     </footer>
-
   </div>
+
+  <script>
+  (async function(){
+    const grid = document.getElementById('deal-grid');
+    try{
+      const res = await fetch('data/deals.json', {cache:'no-store'});
+      const deals = await res.json();
+
+      const now = new Date();
+      const fresh = deals.filter(d => !d.expires_at || new Date(d.expires_at) >= now);
+      fresh.sort((a,b)=> new Date(b.created_at) - new Date(a.created_at));
+      const top3 = fresh.slice(0,3);
+
+      if(!top3.length){
+        grid.innerHTML = '<div class="empty">No deals yet. Check back soon!</div>';
+        return;
+      }
+
+      grid.innerHTML = top3.map(renderCard).join('');
+    }catch(e){
+      grid.innerHTML = '<div class="empty">Could not load deals. Try refresh.</div>';
+    }
+
+    function esc(s){return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+    function renderCard(d){
+      const img = d.image_url ? `<img class="thumb" src="${esc(d.image_url)}" alt="${esc(d.title)}">` : '';
+      const price = d.price_info ? ` <span class="mini">• ${esc(d.price_info)}</span>` : '';
+      return `
+        <article class="card">
+          ${img}
+          <div class="body">
+            <h3 class="title">${esc(d.title)}</h3>
+            <p class="desc">${esc(d.description)}</p>
+            <div class="actions">
+              <a class="deal-btn" href="${esc(d.affiliate_url)}" target="_blank" rel="sponsored noopener">Grab Deal</a>
+              <span class="mini">${esc(d.store || 'Online')}${price}</span>
+            </div>
+          </div>
+        </article>`;
+    }
+  })();
+  </script>
 </body>
 </html>
