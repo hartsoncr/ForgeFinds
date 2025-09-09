@@ -6,244 +6,107 @@
   <title>ForgeFinds — Daily Tech Deals</title>
   <meta name="description" content="ForgeFinds by HartForge: hand-picked tech deals, price drops, and alerts." />
 
-  <!-- Favicon(s) you already added -->
   <link rel="icon" href="favicon.png" type="image/png" />
   <link rel="apple-touch-icon" href="favicon.png" />
 
-  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --bg:#0b0b0c;         /* near-black */
-      --panel:#111214;      /* card bg */
-      --text:#e6e6e6;       /* body text */
-      --muted:#9aa0a6;      /* muted text */
-      --accent:#ff4d00;     /* HartForge ember */
-      --accent-2:#d72600;   /* molten red */
-      --ring:#272a2f;       /* subtle border */
+      --bg:#000;           /* site background */
+      --panel:#111214;     /* card background */
+      --text:#e6e6e6;
+      --muted:#9aa0a6;
+      --accent:#ff4d00;    /* HartForge ember */
+      --accent-2:#d72600;  /* molten red */
+      --ring:#272a2f;
     }
     *{box-sizing:border-box}
-    html,body{margin:0;padding:0;background:#000;color:var(--text);font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
     a{color:inherit;text-decoration:none}
     img{max-width:100%;display:block}
 
     .wrap{max-width:1100px;margin:0 auto;padding:24px 16px}
-    header{
-      display:flex;align-items:center;gap:16px;margin-top:8px;margin-bottom:20px
-    }
-    .logo{
-      width:52px;height:52px;border-radius:12px;
-      background:radial-gradient(120px 80px at 50% 0%,rgba(255,77,0,.35),transparent 60%),#0f0f10;
-      border:1px solid var(--ring);
-      display:grid;place-items:center;overflow:hidden
-    }
+    header{display:flex;align-items:center;gap:16px;margin:6px 0 18px}
+    .logo{width:52px;height:52px;border-radius:12px;background:#0f0f10;border:1px solid var(--ring);display:grid;place-items:center;overflow:hidden}
     .logo img{width:90%;height:auto}
-    .brand{
-      display:flex;flex-direction:column;gap:4px
-    }
-    .brand h1{
-      font: 700 28px/1 "Bebas Neue", sans-serif; letter-spacing:.5px; margin:0;
-      color:var(--accent);
-      text-shadow:0 0 10px rgba(255,77,0,.25)
-    }
+    .brand{display:flex;flex-direction:column;gap:4px}
+    .brand h1{font:700 28px/1 "Bebas Neue",sans-serif;margin:0;letter-spacing:.5px;color:var(--accent);text-shadow:0 0 10px rgba(255,77,0,.25)}
     .brand .tag{font-size:14px;color:var(--muted)}
 
     .socials{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
-    .btn{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:10px 14px;border-radius:12px;border:1px solid var(--ring);
-      background:linear-gradient( to bottom, #151618, #0f1012);
-      color:#fff;font-weight:600;font-size:14px;
-      transition:transform .12s ease, border-color .12s ease;
-    }
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;border:1px solid var(--ring);background:linear-gradient(#151618,#0f1012);color:#fff;font-weight:600;font-size:14px;transition:transform .12s ease,border-color .12s ease}
     .btn:hover{transform:translateY(-1px);border-color:var(--accent)}
     .btn svg{width:18px;height:18px;fill:currentColor}
 
-    /* Deals grid */
-    .section-title{
-      margin:24px 0 8px;font:700 22px/1 "Bebas Neue",sans-serif;letter-spacing:.5px;color:#fff
-    }
-    .deals{
-      display:grid;grid-template-columns:repeat(12,1fr);gap:16px
-    }
-    .card{
-      grid-column:span 12;
-      background:linear-gradient(180deg,#121316,#0b0c0e);
-      border:1px solid var(--ring);border-radius:16px;overflow:hidden;
-      display:grid;grid-template-columns:120px 1fr;gap:0;
-    }
-    @media(min-width:560px){ .card{grid-column:span 6} }
-    @media(min-width:900px){ .card{grid-column:span 4} }
+    .section-title{margin:24px 0 10px;font:700 22px/1 "Bebas Neue",sans-serif;letter-spacing:.5px;color:#fff}
 
-    .thumb{
-      background:#0f0f10;
-      border-right:1px solid var(--ring);
-      display:grid;place-items:center;
-      min-height:120px;
-    }
-    .thumb img{object-fit:cover;width:100%;height:100%}
+    /* Deal card */
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+    .card{grid-column:span 12;background:linear-gradient(180deg,#121316,#0b0c0e);border:1px solid var(--ring);border-radius:16px;overflow:hidden}
+    @media(min-width:700px){.card{grid-column:span 6}}
+    @media(min-width:1000px){.card{grid-column:span 4}}
 
-    .card-body{padding:14px 14px 12px}
-    .card-title{
-      margin:0 0 6px;font:700 18px/1.2 Poppins, sans-serif;color:#fff
-    }
-    .card-desc{margin:0 0 10px;color:var(--muted);font-size:14px;line-height:1.5}
-    .card-actions{display:flex;gap:10px;align-items:center}
-    .deal-btn{
-      background:linear-gradient( to right, var(--accent), var(--accent-2));
-      border:none;color:#fff;padding:10px 12px;border-radius:12px;font-weight:700;
-      text-transform:uppercase;letter-spacing:.2px;font-size:12px;
-      box-shadow:0 0 18px rgba(255,77,0,.25);
-    }
-    .deal-btn:hover{filter:brightness(1.05)}
+    .card img.thumb{width:100%;height:200px;object-fit:cover;background:#0f0f10;border-bottom:1px solid var(--ring)}
+    .card-body{padding:14px}
+    .title{margin:0 0 6px;font:700 18px/1.25 Poppins,sans-serif}
+    .desc{margin:0 0 12px;color:var(--muted);font-size:14px;line-height:1.5}
+    .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .deal-btn{background:linear-gradient(to right,var(--accent),var(--accent-2));border:none;color:#fff;padding:10px 12px;border-radius:12px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;font-size:12px;box-shadow:0 0 18px rgba(255,77,0,.25)}
+    .deal-btn:hover{filter:brightness(1.06)}
     .mini{color:var(--muted);font-size:12px}
 
-    footer{
-      margin:26px 0 10px;padding:16px;border-top:1px solid var(--ring);
-      color:var(--muted);font-size:12px
-    }
+    footer{margin:28px 0 10px;padding:16px;border-top:1px solid var(--ring);color:var(--muted);font-size:12px}
   </style>
 </head>
 <body>
   <div class="wrap">
 
-    <!-- HEADER -->
     <header>
-      <div class="logo">
-        <!-- If you saved forgefinds-logo.png, this will show it -->
-        <img src="forgefinds-logo.png" alt="ForgeFinds logo" onerror="this.style.display='none'">
-      </div>
+      <div class="logo"><img src="forgefinds-logo.png" alt="ForgeFinds logo" onerror="this.style.display='none'"></div>
       <div class="brand">
         <h1>FORGEFINDS</h1>
         <div class="tag">Forging the best tech deals daily.</div>
       </div>
 
-      <!-- Social buttons -->
       <nav class="socials">
         <a class="btn" href="https://www.youtube.com/@ForgeFinds" target="_blank" rel="noopener">
-          <!-- YouTube icon -->
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a4.5 4.5 0 0 0-3.2-3.2C18.5 2.5 12 2.5 12 2.5s-6.5 0-8.3.5A4.5 4.5 0 0 0 .5 6.2a47.4 47.4 0 0 0 0 11.6 4.5 4.5 0 0 0 3.2 3.2c1.8.5 8.3.5 8.3.5s6.5 0 8.3-.5a4.5 4.5 0 0 0 3.2-3.2 47.4 47.4 0 0 0 0-11.6ZM9.75 15.02V8.98L15.5 12l-5.75 3.02Z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M23.5 6.2a4.5 4.5 0 0 0-3.2-3.2C18.5 2.5 12 2.5 12 2.5s-6.5 0-8.3.5A4.5 4.5 0 0 0 .5 6.2a47.4 47.4 0 0 0 0 11.6 4.5 4.5 0 0 0 3.2 3.2c1.8.5 8.3.5 8.3.5s6.5 0 8.3-.5a4.5 4.5 0 0 0 3.2-3.2 47.4 47.4 0 0 0 0-11.6ZM9.75 15.02V8.98L15.5 12l-5.75 3.02Z"/></svg>
           YouTube
         </a>
         <a class="btn" href="https://www.tiktok.com/@forge_finds" target="_blank" rel="noopener">
-          <!-- TikTok icon -->
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8.1a7.5 7.5 0 0 1-4-1.2v7.2a5.9 5.9 0 1 1-5.9-5.9c.3 0 .6 0 .9.1v3.1a2.8 2.8 0 1 0 2-2.7V2h3.2c.4 1.3 1.3 2.5 2.5 3.3.9.6 1.9 1 3 1.1v3.7c-.6 0-1.2-.1-1.7-.2Z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M21 8.1a7.5 7.5 0 0 1-4-1.2v7.2a5.9 5.9 0 1 1-5.9-5.9c.3 0 .6 0 .9.1v3.1a2.8 2.8 0 1 0 2-2.7V2h3.2c.4 1.3 1.3 2.5 2.5 3.3.9.6 1.9 1 3 1.1v3.7c-.6 0-1.2-.1-1.7-.2Z"/></svg>
           TikTok
         </a>
       </nav>
     </header>
 
-    <!-- DEALS -->
     <h2 class="section-title">Latest Deals</h2>
-    <div class="deals">
 
-      <!-- ======= DEAL CARD (duplicate this block for more deals) ======= -->
+    <section class="grid">
+
+      <!-- DEAL CARD 1 -->
       <article class="card">
-        <div class="thumb">
-          <!-- Replace src with your own product image if you want -->
-          <img src="https://images.unsplash.com/photo-1518779578993-ec3579fee39f?auto=format&fit=crop&w=600&q=60"
-               alt="MagSafe Power Bank">
-        </div>
+        <!-- Replace the src with your own image or an Amazon SiteStripe image URL -->
+        <img class="thumb" src="images/magsafe-5000.jpg" alt="MagSafe 5000mAh Power Bank">
         <div class="card-body">
-          <h3 class="card-title">⚡ 78% OFF MagSafe Power Bank (5000mAh)</h3>
-          <p class="card-desc">
-            Slim, snap-on power for iPhone MagSafe. USB-C fast charging, great for travel, and priced under $50 while the sale lasts.
-          </p>
-          <div class="card-actions">
+          <h3 class="title">⚡ 78% OFF MagSafe Power Bank (5000mAh)</h3>
+          <p class="desc">Slim, snap-on power for iPhone MagSafe. USB-C fast charging, great for travel, and priced under $50 while the sale lasts.</p>
+          <div class="actions">
             <a class="deal-btn" href="https://amzn.to/3JUso6i" target="_blank" rel="sponsored noopener">Grab Deal</a>
             <span class="mini">Amazon • Limited time</span>
           </div>
         </div>
       </article>
-      <!-- ======= /DEAL CARD ======= -->
 
-      <!-- Example placeholder to copy later:
-      <article class="card">
-        <div class="thumb">
-          <img src="images/YOUR-PRODUCT.jpg" alt="Product name">
-        </div>
-        <div class="card-body">
-          <h3 class="card-title">🔥 DEAL TITLE</h3>
-          <p class="card-desc">One-liner about what it is and why it’s a steal.</p>
-          <div class="card-actions">
-            <a class="deal-btn" href="https://amzn.to/XXXXXXX" target="_blank" rel="sponsored noopener">Grab Deal</a>
-            <span class="mini">Amazon • Limited time</span>
-          </div>
-        </div>
-      </article>
-      -->
+      <!-- To add more deals, duplicate the article above and change the img src, title, desc, and link. -->
 
-    </div>
+    </section>
 
-    <!-- FOOTER -->
     <footer>
-      <strong>Disclosure:</strong> As an Amazon Associate, ForgeFinds earns from qualifying purchases.
-      Prices and availability are subject to change.
+      <strong>Disclosure:</strong> As an Amazon Associate, ForgeFinds earns from qualifying purchases. Prices and availability may change without notice.
     </footer>
 
   </div>
-</body>
-</html>      padding: 40px 20px;
-      border-bottom: 3px solid var(--forge-ember);
-    }
-    header img {
-      max-width: 160px;
-      margin-bottom: 15px;
-    }
-    h1 {
-      margin: 0;
-      font-size: 2.5rem;
-      color: var(--forge-ember);
-      font-family: 'Bebas Neue', Arial, sans-serif;
-      letter-spacing: 2px;
-    }
-    p.tagline {
-      font-size: 1.2rem;
-      margin-top: 10px;
-      color: #bbb;
-      font-family: 'Oswald', Arial, sans-serif;
-    }
-    .links { margin: 40px 0; }
-    .links a {
-      display: inline-block;
-      margin: 12px;
-      padding: 14px 22px;
-      background: var(--forge-ember);
-      color: #fff;
-      text-decoration: none;
-      border-radius: 8px;
-      font-weight: bold;
-      letter-spacing: 1px;
-      transition: background 0.3s ease, transform 0.2s ease;
-    }
-    .links a:hover { background: var(--molten-red); transform: scale(1.05); }
-    footer {
-      background: #000;
-      font-size: 0.85rem;
-      padding: 20px;
-      color: #777;
-      border-top: 2px solid var(--steel-gray);
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <img src="forgefinds-logo.png" alt="ForgeFinds Logo">
-    <h1>ForgeFinds</h1>
-    <p class="tagline">Forging the best deals daily 🔥</p>
-  </header>
-
-  <section>
-    <p>Follow us for daily deal drops ⬇️</p>
-    <div class="links">
-      <a href="https://youtube.com/@ForgeFinds" target="_blank">YouTube</a>
-      <a href="https://tiktok.com/@ForgeFinds" target="_blank">TikTok</a>
-    </div>
-  </section>
-
-  <footer>
-    <p>Affiliate Disclosure: ForgeFinds may earn commissions from qualifying purchases. Prices & availability change without notice.</p>
-  </footer>
 </body>
 </html>
