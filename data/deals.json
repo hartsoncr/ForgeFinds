@@ -24,5 +24,18 @@
     "created_at": "2025-09-09T23:00:00Z",
     "expires_at": "2025-09-30",
     "slug": "60w-super-fast-charger"
+  },
+  {
+    "title": "🎶 Tesla Coil Music Speaker",
+    "description": "A plasma arc Tesla coil that plays music with lightning! Plug into your phone or laptop and watch sparks dance in sync with your songs. Normally pricey tech, but now only $45.99 with a $4.60 coupon.",
+    "price_info": "$45.99 (with $4.60 coupon)",
+    "store": "Amazon",
+    "image_url": "https://m.media-amazon.com/images/I/71rQvE1Z2dL._AC_SX679_.jpg",
+    "affiliate_url": "https://www.amazon.com/dp/B0BKQS9BJZ",
+    "tags": ["tesla-coil", "speaker", "music", "gadgets"],
+    "category": "gadgets",
+    "created_at": "2025-09-10T00:00:00Z",
+    "expires_at": "2025-09-30",
+    "slug": "tesla-coil-music-speaker"
   }
 ]
