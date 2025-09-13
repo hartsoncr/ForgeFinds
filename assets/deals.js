@@ -1,4 +1,4 @@
-// /assets/deals.js  (NO <script> TAGS IN THIS FILE)
+// /assets/deals.js  (raw JavaScript, no <script> tags)
 
 /** ------ Helpers ------ */
 const FF = (() => {
@@ -78,10 +78,6 @@ const FF = (() => {
     .cta{display:inline-block;background:var(--accent);color:#0b0d10;font-weight:700;border-radius:10px;padding:10px 12px;text-align:center}
     .empty{color:var(--muted)}
     .expired{opacity:.55;filter:grayscale(30%)}
-    .toolbar{display:flex;gap:10px;align-items:center;margin:16px 0}
-    .toolbar input[type="search"]{padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:#0b0d10;color:var(--text);min-width:220px}
-    .pill{padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:#0b0d10;color:var(--text);cursor:pointer}
-    .pill[data-active="1"]{background:#1b2130}
     `;
     const style = document.createElement("style");
     style.id = "ff-styles";
