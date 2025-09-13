@@ -118,6 +118,17 @@ window.ForgeFinds = {
       if (mount) mount.innerHTML = `<p class="empty">We couldn’t load deals right now.</p>`;
     }
   },
-  // exposed for browse.html custom filtering
-  loadDeals: FF.loadDeals
+  // expose raw loader (used elsewhere)
+  loadDeals: FF.loadDeals,
+  // NEW: render directly from a provided list (no loader)
+  renderFromList(list, mountSelector="#deals"){
+    try{
+      FF.injectStyles();
+      FF.renderList(Array.isArray(list) ? list : [], mountSelector);
+    }catch(err){
+      console.error(err);
+      const mount = document.querySelector(mountSelector);
+      if (mount) mount.innerHTML = `<p class="empty">We couldn’t load deals right now.</p>`;
+    }
+  }
 };
