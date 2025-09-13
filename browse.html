@@ -4,16 +4,24 @@
   <meta charset="utf-8">
   <title>Browse Deals — ForgeFinds</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Hide this page from bots -->
+  <meta name="robots" content="noindex, noarchive">
   <link rel="icon" href="/forgefinds-favicon.png">
+  <link rel="preconnect" href="https://m.media-amazon.com">
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;margin:0}
-    header{padding:18px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #202635;background:#0f1115;color:#e6edf6;position:sticky;top:0}
-    header .brand{display:flex;gap:10px;align-items:center}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;margin:0;background:#0f1115;color:#e6edf6}
+    header{padding:18px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #202635;background:#0f1115;position:sticky;top:0;z-index:2}
     header img{width:28px;height:28px}
-    main{padding:20px}
     a.logo{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none}
+    main{padding:20px}
+    .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:6px 0 18px}
+    input[type="search"]{padding:10px 12px;border-radius:12px;border:1px solid #202635;background:#0b0d10;color:#e6edf6;min-width:260px}
+    .pills{display:flex;flex-wrap:wrap;gap:8px}
+    .pill{padding:7px 11px;border:1px solid #202635;border-radius:999px;background:#0b0d10;color:#e6edf6;cursor:pointer;font-size:.9rem}
+    .pill[data-active="1"]{background:#1b2130}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
   </style>
-  <script src="/assets/deals.js"></script>
+  <script src="/assets/deals.js" defer></script>
 </head>
 <body>
   <header>
@@ -27,40 +35,80 @@
   <main>
     <div class="toolbar">
       <input id="q" type="search" placeholder="Search deals…">
-      <button id="toggle" class="pill" data-active="0" title="Show scheduled posts too">Preview scheduled</button>
+      <div id="cats" class="pills" aria-label="Categories"></div>
+      <!-- No visible preview control -->
     </div>
     <section class="grid" id="deals"></section>
   </main>
 
   <script>
-    // Respect ?preview=1 from URL
+    // -------- Hidden Preview with PIN -----------
+    // Change this PIN to anything you like
+    const PREVIEW_PIN = "4242";
+
     const url = new URL(location.href);
-    let preview = url.searchParams.get("preview") === "1";
+    const wantPreview = url.searchParams.get("preview") === "1";
+    const pin = url.searchParams.get("pin") || "";
+    const preview = wantPreview && pin === PREVIEW_PIN;
 
     const $q = document.getElementById("q");
-    const $toggle = document.getElementById("toggle");
+    const $cats = document.getElementById("cats");
 
-    // initial UI state
-    $toggle.dataset.active = preview ? "1" : "0";
+    let allDeals = [];
+    let activeCat = "all";
 
-    async function refresh(){
-      const q = $q.value.trim();
-      await ForgeFinds.renderDeals({ mountSelector:"#deals", includeScheduled:preview, q });
+    function uniqueCategories(items){
+      const set = new Set(items.map(d => (d.category || "other")));
+      return ["all", ...Array.from(set).sort()];
     }
 
-    $q.addEventListener("input", () => refresh());
-    $toggle.addEventListener("click", () => {
-      preview = !preview;
-      $toggle.dataset.active = preview ? "1" : "0";
-      // update URL param without reload
-      const u = new URL(location.href); 
-      if (preview) u.searchParams.set("preview","1"); else u.searchParams.delete("preview");
-      history.replaceState({}, "", u.toString());
-      refresh();
-    });
+    function pill(label, active=false){
+      const el = document.createElement("button");
+      el.className = "pill";
+      el.dataset.active = active ? "1" : "0";
+      el.textContent = label;
+      el.addEventListener("click", () => {
+        activeCat = label;
+        document.querySelectorAll(".pill").forEach(p => p.dataset.active = (p.textContent === label) ? "1" : "0");
+        refresh();
+      });
+      return el;
+    }
 
-    // initial paint
-    refresh();
+    function clientFilter(src){
+      const q = ($q.value || "").trim().toLowerCase();
+      return src.filter(d => {
+        const catOK = (activeCat === "all") || ((d.category || "other") === activeCat);
+        if (!catOK) return false;
+        if (!q) return true;
+        const hay = [
+          d.title || "",
+          d.description || "",
+          (d.tags || []).join(" "),
+          d.category || ""
+        ].join(" ").toLowerCase();
+        return hay.includes(q);
+      });
+    }
+
+    async function refresh(){
+      const filtered = clientFilter(allDeals);
+      const orig = ForgeFinds.loadDeals;
+      ForgeFinds.loadDeals = async () => filtered; // feed the filtered list
+      await ForgeFinds.renderDeals({ mountSelector:"#deals", includeScheduled: preview, q: "" });
+      ForgeFinds.loadDeals = orig;
+    }
+
+    async function init(){
+      allDeals = await ForgeFinds.loadDeals({ includeScheduled: preview });
+      const cats = uniqueCategories(allDeals);
+      $cats.innerHTML = "";
+      cats.forEach((c, i) => $cats.appendChild(pill(c, i===0)));
+      $q.addEventListener("input", refresh);
+      refresh();
+    }
+
+    document.addEventListener("DOMContentLoaded", init);
   </script>
 </body>
 </html>
