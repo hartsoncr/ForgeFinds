@@ -72,7 +72,7 @@ const FF = (() => {
     .deal-card .content{padding:12px 14px}
     .deal-card .title{font-size:1.05rem;line-height:1.25;margin:0 0 6px}
     .deal-card .desc{color:var(--muted);font-size:.9rem;margin:0 0 10px}
-    .deal-card .meta{display:flex;align-items:center;gap:8px;margin:0 0 10px}
+    .deal-card .meta{display:flex;align-items:center;gap:8px;margin:0 0 10px;flex-wrap:wrap}
     .price{background:var(--goodbg);color:var(--good);padding:4px 8px;border-radius:8px;font-weight:600}
     .badge.coupon{background:var(--couponbg);color:var(--couponfg);padding:4px 8px;border-radius:8px;font-weight:600}
     .cta{display:inline-block;background:var(--accent);color:#0b0d10;font-weight:700;border-radius:10px;padding:10px 12px;text-align:center}
