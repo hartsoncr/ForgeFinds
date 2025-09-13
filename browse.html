@@ -84,7 +84,7 @@
 
   <script>
     // -------- Hidden Preview with PIN -----------
-    const PREVIEW_PIN = "4242"; // change this to your secret
+    const PREVIEW_PIN = "4242"; // change this as you like
     const url = new URL(location.href);
     const preview = url.searchParams.get("preview") === "1" && (url.searchParams.get("pin") || "") === PREVIEW_PIN;
 
@@ -215,7 +215,7 @@
       if (mode === "priceAsc") arr.sort(comparePriceAsc);
       else if (mode === "priceDesc") arr.sort(comparePriceDesc);
       else if (mode === "pctOff") arr.sort(comparePctOffDesc);
-      // else newest: keep original order (from loader it’s newest→oldest)
+      // else newest: keep original order (loader already returns newest → oldest)
       return arr;
     }
 
@@ -224,11 +224,8 @@
       // update count
       $count.textContent = `${filtered.length} deal${filtered.length===1?'':'s'}`;
 
-      // render using shared renderer by stubbing the loader
-      const orig = ForgeFinds.loadDeals;
-      ForgeFinds.loadDeals = async () => filtered;
-      await ForgeFinds.renderDeals({ mountSelector:"#deals", includeScheduled: preview, q: "" });
-      ForgeFinds.loadDeals = orig;
+      // render directly from the filtered list (no loader stub)
+      ForgeFinds.renderFromList(filtered, "#deals");
 
       // empty state hint
       const none = filtered.length === 0;
