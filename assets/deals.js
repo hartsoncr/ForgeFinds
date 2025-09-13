@@ -11,16 +11,17 @@ const FF = (() => {
     const deals = await res.json();
 
     const n = now();
-    const filtered = deals
+    const list = deals
       .filter(d => {
         const pub = parseISO(d.publish_at || d.created_at || "1970-01-01T00:00:00-04:00");
         const exp = parseISO(d.expires_at || "9999-12-31T23:59:59-04:00");
         const isLive = pub <= n && exp > n;
         return includeScheduled ? true : isLive;
       })
-      .sort((a, b) => parseISO(b.publish_at || b.created_at) - parseISO(a.publish_at || a.created_at));
+      .sort((a, b) => parseISO(b.publish_at || b.created_at) - parseISO(a.publish_at || a.created_at))
+      .map(deriveNumbers); // add __price & __pctOff once
 
-    return filtered.map(deriveNumbers); // add __price & __pctOff once
+    return list;
   }
 
   /** ---------- Price / %off derivation ---------- */
@@ -35,27 +36,37 @@ const FF = (() => {
     const m = /(\d{1,3})\s*%/.exec(str);
     return m ? parseFloat(m[1]) : null;
   }
+  // pull the value explicitly after the word "was"
+  function extractWas(info=""){
+    const m = /was[^$]*\$([\d,]+(?:\.\d{1,2})?)/i.exec(info);
+    if (m) return parseFloat(m[1].replace(/,/g,""));
+    const monies = [...info.matchAll(moneyRx)].map(m => parseFloat(m[1].replace(/,/g,"")));
+    if (monies.length >= 2) {
+      const first = monies[0], last = monies[monies.length-1];
+      if (last > first) return last; // heuristic
+    }
+    return null;
+  }
 
   function deriveNumbers(d){
+    // Base (display current) price
     let price = dollarsOne(d.display_price) ?? dollarsOne(d.price_info);
-    const couponText = (d.coupon || d.price_info || "").toLowerCase();
+
+    // Only look at the COUPON field for extra $/% off
+    const couponText = (d.coupon || "").toLowerCase();
     const dollarOff = dollarsOne(couponText);
     const pctOffCoupon = percentOne(couponText);
 
     if (price != null){
       if (pctOffCoupon != null) price = +(price * (1 - pctOffCoupon/100)).toFixed(2);
-      if (dollarOff != null) price = Math.max(0, +(price - dollarOff).toFixed(2));
+      if (dollarOff != null)    price = Math.max(0, +(price - dollarOff).toFixed(2));
     }
 
-    // infer % off
-    let pct = pctOffCoupon;
-    if (pct == null){
-      const info = d.price_info || "";
-      const monies = [...info.matchAll(moneyRx)].map(m => parseFloat(m[1].replace(/,/g,"")));
-      if (info.toLowerCase().includes("was") && monies.length >= 2 && price != null){
-        const was = monies[monies.length - 1];
-        if (was > 0 && price <= was) pct = Math.round(100 * (1 - price/was));
-      }
+    // % off: prefer explicit coupon %, else try in price_info, else compute from "was $X"
+    let pct = pctOffCoupon ?? percentOne(d.price_info || "");
+    if (pct == null && price != null){
+      const was = extractWas(d.price_info || "");
+      if (was && was > 0 && price <= was) pct = Math.round(100 * (1 - price/was));
     }
 
     return { ...d, __price: price, __pctOff: pct };
@@ -65,8 +76,8 @@ const FF = (() => {
 
   function dealCardHTML(d){
     const priceText = d.display_price || d.price_info || "";
-    const coupon = d.coupon ? `<span class="badge coupon" title="Extra savings">${d.coupon}</span>` : "";
     const offBadge = (d.__pctOff != null) ? `<span class="badge off">${d.__pctOff}% off</span>` : "";
+    const coupon = d.coupon ? `<span class="badge coupon" title="Extra savings">${d.coupon}</span>` : "";
     const expired = parseISO(d.expires_at || "") <= now();
     const store = d.store || "Shop";
 
