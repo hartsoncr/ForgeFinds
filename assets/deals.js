@@ -1,23 +1,26 @@
-<!-- /assets/deals.js -->
-<script>
+// /assets/deals.js  (NO <script> TAGS IN THIS FILE)
+
 /** ------ Helpers ------ */
 const FF = (() => {
-  // Updated parser: supports UTC "Z" or timezone offsets like "-04:00"
+  // Supports ISO with Z or timezone offsets like -04:00
   const parseISO = (s = "") => new Date(s);
   const now = () => new Date();
 
   async function loadDeals({ includeScheduled = false } = {}) {
     const res = await fetch(`${basePath()}/data/deals.json?cb=${Date.now()}`);
+    if (!res.ok) throw new Error(`Failed to load deals.json: ${res.status}`);
     const deals = await res.json();
 
     const n = now();
 
-    const filtered = deals.filter(d => {
-      const pub = parseISO(d.publish_at || d.created_at || "1970-01-01T00:00:00-04:00");
-      const exp = parseISO(d.expires_at || "9999-12-31T23:59:59-04:00");
-      const isLive = pub <= n && exp > n;
-      return includeScheduled ? true : isLive;
-    }).sort((a, b) => parseISO(b.publish_at || b.created_at) - parseISO(a.publish_at || a.created_at));
+    const filtered = deals
+      .filter(d => {
+        const pub = parseISO(d.publish_at || d.created_at || "1970-01-01T00:00:00-04:00");
+        const exp = parseISO(d.expires_at || "9999-12-31T23:59:59-04:00");
+        const isLive = pub <= n && exp > n;
+        return includeScheduled ? true : isLive;
+      })
+      .sort((a, b) => parseISO(b.publish_at || b.created_at) - parseISO(a.publish_at || a.created_at));
 
     return filtered;
   }
@@ -33,11 +36,11 @@ const FF = (() => {
     return `
     <article class="deal-card ${expired ? "expired": ""}">
       <a class="imgwrap" href="${d.affiliate_url}" target="_blank" rel="nofollow noopener">
-        <img loading="lazy" src="${d.image_url}" alt="${escapeHTML(d.title)}">
+        <img loading="lazy" src="${d.image_url}" alt="${escapeHTML(d.title || "")}">
       </a>
       <div class="content">
-        <h3 class="title">${escapeHTML(d.title)}</h3>
-        <p class="desc">${escapeHTML(d.description)}</p>
+        <h3 class="title">${escapeHTML(d.title || "")}</h3>
+        <p class="desc">${escapeHTML(d.description || "")}</p>
         <div class="meta">
           <span class="price">${money(price)}</span>
           ${coupon}
@@ -86,7 +89,6 @@ const FF = (() => {
     document.head.appendChild(style);
   }
 
-  // simple search
   function search(deals, q){
     if (!q) return deals;
     const s = q.toLowerCase();
@@ -97,10 +99,7 @@ const FF = (() => {
     );
   }
 
-  function basePath(){
-    // Works for custom domains & user pages
-    return "";
-  }
+  function basePath(){ return ""; } // root
 
   function escapeHTML(str=""){
     return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -112,10 +111,15 @@ const FF = (() => {
 /** ------ Public API ------ */
 window.ForgeFinds = {
   async renderDeals({ mountSelector="#deals", includeScheduled=false, q="" } = {}){
-    FF.injectStyles();
-    const all = await FF.loadDeals({ includeScheduled });
-    const filtered = FF.search(all, q);
-    FF.renderList(filtered, mountSelector);
+    try{
+      FF.injectStyles();
+      const all = await FF.loadDeals({ includeScheduled });
+      const filtered = FF.search(all, q);
+      FF.renderList(filtered, mountSelector);
+    }catch(err){
+      console.error(err);
+      const mount = document.querySelector(mountSelector);
+      if (mount) mount.innerHTML = `<p class="empty">We couldn’t load deals right now.</p>`;
+    }
   }
 };
-</script>
