@@ -124,7 +124,6 @@
       return el;
     }
 
-    // Filtering / sorting
     function filterList(src){
       const q = ($q.value || "").trim().toLowerCase();
       const min$ = $minPrice.value !== "" ? parseFloat($minPrice.value) : null;
@@ -142,7 +141,6 @@
         if (min$ != null && (d.__price == null || d.__price < min$)) return false;
         if (max$ != null && (d.__price == null || d.__price > max$)) return false;
         if (minPct != null && (d.__pctOff == null || d.__pctOff < minPct)) return false;
-
         return true;
       });
     }
@@ -157,8 +155,7 @@
       } else if (mode === "pctOff"){
         arr.sort((a,b) => (b.__pctOff ?? -1) - (a.__pctOff ?? -1));
       }
-      // newest: leave as-is (loader returned newest → oldest)
-      return arr;
+      return arr; // newest keeps loader order
     }
 
     function refresh(){
