@@ -14,7 +14,8 @@
     main{padding:20px}
     a.logo{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none}
   </style>
-  <script src="/assets/deals.js"></script>
+  <!-- JS now loaded with defer -->
+  <script src="/assets/deals.js" defer></script>
 </head>
 <body>
   <header>
@@ -30,8 +31,9 @@
   </main>
 
   <script>
-    // Live items only
-    ForgeFinds.renderDeals({ mountSelector:"#deals", includeScheduled:false });
+    document.addEventListener("DOMContentLoaded", () => {
+      ForgeFinds.renderDeals({ mountSelector:"#deals", includeScheduled:false });
+    });
   </script>
 </body>
 </html>
