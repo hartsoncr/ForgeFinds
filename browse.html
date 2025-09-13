@@ -19,10 +19,12 @@
     header img{width:28px;height:28px}
     a.logo{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none}
     main{padding:20px}
-    .toolbar{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;margin:6px 0 16px}
+    .toolbar{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;margin:6px 0 16px}
     .subbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 18px}
-    input[type="search"]{padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#0b0d10;color:var(--text);min-width:260px}
-    select{padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#0b0d10;color:var(--text)}
+    input[type="search"], input[type="number"], select{
+      padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#0b0d10;color:var(--text)
+    }
+    input[type="number"]{width:110px}
     .pills{display:flex;flex-wrap:wrap;gap:8px}
     .pill{padding:7px 11px;border:1px solid var(--line);border-radius:999px;background:#0b0d10;color:var(--text);cursor:pointer;font-size:.9rem}
     .pill[data-active="1"]{background:#1b2130}
@@ -40,6 +42,7 @@
     .cta{display:inline-block;background:var(--accent);color:#0b0d10;font-weight:700;border-radius:10px;padding:10px 12px;text-align:center}
     .empty{color:var(--muted)}
     .count{color:var(--muted);font-size:.9rem}
+    .hint{color:var(--muted);font-size:.9rem;margin-top:10px}
   </style>
   <script src="/assets/deals.js" defer></script>
 </head>
@@ -63,6 +66,11 @@
           <option value="pctOff">% Off (High → Low)</option>
         </select>
       </label>
+      <div>
+        <input id="minPrice" type="number" min="0" step="0.01" placeholder="Min $" title="Minimum price">
+        <input id="maxPrice" type="number" min="0" step="0.01" placeholder="Max $" title="Maximum price">
+        <input id="minPct"   type="number" min="0" max="100" step="1" placeholder="Min % off" title="Minimum % off">
+      </div>
     </div>
 
     <div class="subbar">
@@ -71,11 +79,12 @@
     </div>
 
     <section class="grid" id="deals"></section>
+    <p class="hint" id="hint" style="display:none;"></p>
   </main>
 
   <script>
     // -------- Hidden Preview with PIN -----------
-    const PREVIEW_PIN = "4242"; // <- change me
+    const PREVIEW_PIN = "4242"; // change this to your secret
     const url = new URL(location.href);
     const preview = url.searchParams.get("preview") === "1" && (url.searchParams.get("pin") || "") === PREVIEW_PIN;
 
@@ -84,6 +93,10 @@
     const $sort = document.getElementById("sort");
     const $cats = document.getElementById("cats");
     const $count = document.getElementById("count");
+    const $minPrice = document.getElementById("minPrice");
+    const $maxPrice = document.getElementById("maxPrice");
+    const $minPct = document.getElementById("minPct");
+    const $hint = document.getElementById("hint");
 
     // State
     let allDeals = [];
@@ -102,9 +115,8 @@
       return m ? parseFloat(m[1]) : null;
     }
     function effectivePrice(d){
-      // Start with display_price -> price_info fallback -> null
+      // Base from display_price -> price_info
       let base = dollars(d.display_price) ?? dollars(d.price_info);
-      // Coupon text may indicate extra $ off or % off
       const couponText = (d.coupon || d.price_info || "").toLowerCase();
       const dollarOff = dollars(couponText);      // "$50 off", "$4.60 coupon"
       const pctOff    = percent(couponText);      // "Save 10% at checkout"
@@ -112,7 +124,21 @@
         if (pctOff != null) base = +(base * (1 - pctOff/100)).toFixed(2);
         if (dollarOff != null) base = Math.max(0, +(base - dollarOff).toFixed(2));
       }
-      return base; // may be null if no price parsed
+      return base; // may be null
+    }
+    function discountPercent(d){
+      const cur = effectivePrice(d);
+      if (cur == null) return percent(d.coupon || d.price_info);
+      let was = null;
+      const info = d.price_info || "";
+      const money = [...info.matchAll(moneyRx)].map(m=>parseFloat(m[1].replace(/,/g,"")));
+      if (info.toLowerCase().includes("was") && money.length >= 2){
+        was = money[money.length-1];
+      }
+      const explicitPct = percent(d.coupon || d.price_info);
+      if (explicitPct != null) return explicitPct;
+      if (was != null && was > 0 && cur <= was) return Math.round(100 * (1 - cur/was));
+      return null;
     }
     function comparePriceAsc(a,b){
       const pa = effectivePrice(a), pb = effectivePrice(b);
@@ -121,34 +147,13 @@
       if (pb==null) return -1;
       return pa - pb;
     }
-    function comparePriceDesc(a,b){ return -comparePriceAsc(a,b); }
-    function discountPercent(d){
-      // Try to compute %off from "was $X" if present, else from explicit % coupon
-      const cur = effectivePrice(d);
-      if (cur == null) return null;
-      // Look for a "was $X" in price_info
-      let was = null;
-      const info = d.price_info || "";
-      const money = [...info.matchAll(moneyRx)].map(m=>parseFloat(m[1].replace(/,/g,"")));
-      if (info.toLowerCase().includes("was") && money.length >= 2){
-        // assume first is current, second is was
-        was = money[money.length-1];
-      }
-      // if % in coupon, just return it
-      const pct = percent(d.coupon || d.price_info);
-      if (pct != null) return pct;
-
-      if (was != null && was > 0 && cur <= was){
-        return Math.round(100 * (1 - cur/was));
-      }
-      return null;
-    }
+    const comparePriceDesc = (a,b) => -comparePriceAsc(a,b);
     function comparePctOffDesc(a,b){
       const pa = discountPercent(a), pb = discountPercent(b);
       if (pa==null && pb==null) return 0;
       if (pa==null) return 1;
       if (pb==null) return -1;
-      return pb - pa; // high → low
+      return pb - pa;
     }
 
     // ---------- UI helpers ----------
@@ -171,17 +176,36 @@
 
     function clientFilter(src){
       const q = ($q.value || "").trim().toLowerCase();
+      const min$ = $minPrice.value ? parseFloat($minPrice.value) : null;
+      const max$ = $maxPrice.value ? parseFloat($maxPrice.value) : null;
+      const minPct = $minPct.value ? parseFloat($minPct.value) : null;
+
       return src.filter(d => {
+        // category
         const catOK = (activeCat === "all") || ((d.category || "other") === activeCat);
         if (!catOK) return false;
-        if (!q) return true;
-        const hay = [
-          d.title || "",
-          d.description || "",
-          (d.tags || []).join(" "),
-          d.category || ""
-        ].join(" ").toLowerCase();
-        return hay.includes(q);
+
+        // search
+        if (q){
+          const hay = [
+            d.title || "",
+            d.description || "",
+            (d.tags || []).join(" "),
+            d.category || ""
+          ].join(" ").toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+
+        // price range
+        const p = effectivePrice(d);
+        if (min$ != null && (p == null || p < min$)) return false;
+        if (max$ != null && (p == null || p > max$)) return false;
+
+        // percent off
+        const pct = discountPercent(d);
+        if (minPct != null && (pct == null || pct < minPct)) return false;
+
+        return true;
       });
     }
 
@@ -191,10 +215,7 @@
       if (mode === "priceAsc") arr.sort(comparePriceAsc);
       else if (mode === "priceDesc") arr.sort(comparePriceDesc);
       else if (mode === "pctOff") arr.sort(comparePctOffDesc);
-      else {
-        // newest = by publish_at/created_at desc (already what renderDeals does)
-        // We'll just leave order as-is.
-      }
+      // else newest: keep original order (from loader it’s newest→oldest)
       return arr;
     }
 
@@ -202,47 +223,37 @@
       const filtered = clientSort(clientFilter(allDeals));
       // update count
       $count.textContent = `${filtered.length} deal${filtered.length===1?'':'s'}`;
-      // feed filtered list to the shared renderer
+
+      // render using shared renderer by stubbing the loader
       const orig = ForgeFinds.loadDeals;
       ForgeFinds.loadDeals = async () => filtered;
       await ForgeFinds.renderDeals({ mountSelector:"#deals", includeScheduled: preview, q: "" });
       ForgeFinds.loadDeals = orig;
-      // annotate cards with computed %off if available
-      annotateDiscountBadges();
-    }
 
-    function annotateDiscountBadges(){
-      // Add a “xx% off” badge when we computed it but JSON didn't have one
-      const cards = document.querySelectorAll(".deal-card");
-      cards.forEach(card => {
-        const title = card.querySelector(".title")?.textContent || "";
-        const d = allDeals.find(x => x.title === title);
-        if (!d) return;
-        const pct = discountPercent(d);
-        if (pct != null){
-          const meta = card.querySelector(".meta");
-          if (!meta) return;
-          // only add if coupon badge doesn't already express %
-          if (!/coupon|%/i.test((d.coupon||"")+ (d.price_info||""))){
-            const span = document.createElement("span");
-            span.className = "badge off";
-            span.textContent = `${pct}% off est.`;
-            meta.appendChild(span);
-          }
-        }
-      });
+      // empty state hint
+      const none = filtered.length === 0;
+      $hint.style.display = none ? "block" : "none";
+      if (none){
+        $hint.textContent = preview
+          ? "No deals match your filters."
+          : "No live deals match your filters. For scheduled items, append ?preview=1&pin=4242 to the URL.";
+      }
     }
 
     async function init(){
+      // Load deals (live or live+scheduled)
       allDeals = await ForgeFinds.loadDeals({ includeScheduled: preview });
-      // build category pills
+
+      // Build category pills
       const cats = uniqueCategories(allDeals);
       $cats.innerHTML = "";
       cats.forEach((c, i) => $cats.appendChild(pill(c, i===0)));
-      // wire events
-      $q.addEventListener("input", refresh);
+
+      // Wire events
+      [$q, $sort, $minPrice, $maxPrice, $minPct].forEach(el => el.addEventListener("input", refresh));
       $sort.addEventListener("change", refresh);
-      // first paint
+
+      // First paint
       refresh();
     }
 
