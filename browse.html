@@ -4,7 +4,6 @@
   <meta charset="utf-8">
   <title>Browse Deals — ForgeFinds</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Hide this page from bots -->
   <meta name="robots" content="noindex, noarchive">
   <link rel="icon" href="/forgefinds-favicon.png">
   <link rel="preconnect" href="https://m.media-amazon.com">
@@ -19,15 +18,20 @@
     header img{width:28px;height:28px}
     a.logo{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none}
     main{padding:20px}
+
     .toolbar{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;margin:6px 0 16px}
     .subbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 18px}
+
     input[type="search"], input[type="number"], select{
       padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#0b0d10;color:var(--text)
     }
     input[type="number"]{width:110px}
+    select{min-width:180px}
+
     .pills{display:flex;flex-wrap:wrap;gap:8px}
     .pill{padding:7px 11px;border:1px solid var(--line);border-radius:999px;background:#0b0d10;color:var(--text);cursor:pointer;font-size:.9rem}
     .pill[data-active="1"]{background:#1b2130}
+
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
     .deal-card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
     .deal-card .imgwrap{display:block;background:#0b0d10}
@@ -83,12 +87,12 @@
   </main>
 
   <script>
-    // -------- Hidden Preview with PIN -----------
-    const PREVIEW_PIN = "4242"; // change this as you like
+    // ---------- Hidden Preview ----------
+    const PREVIEW_PIN = "4242";
     const url = new URL(location.href);
     const preview = url.searchParams.get("preview") === "1" && (url.searchParams.get("pin") || "") === PREVIEW_PIN;
 
-    // DOM
+    // ---------- DOM ----------
     const $q = document.getElementById("q");
     const $sort = document.getElementById("sort");
     const $cats = document.getElementById("cats");
@@ -98,62 +102,51 @@
     const $minPct = document.getElementById("minPct");
     const $hint = document.getElementById("hint");
 
-    // State
-    let allDeals = [];
+    // ---------- State ----------
+    let allDeals = [];   // raw
+    let deals = [];      // augmented (with __price, __pctOff)
     let activeCat = "all";
 
-    // ---------- Utilities: price & discount parsing ----------
+    // ---------- Parsing helpers ----------
     const moneyRx = /\$([\d,]+(?:\.\d{1,2})?)/g;
-    function dollars(str){
+    function dollarsOne(str){
       if (!str) return null;
       const m = /\$([\d,]+(?:\.\d{1,2})?)/.exec(str);
       return m ? parseFloat(m[1].replace(/,/g,"")) : null;
     }
-    function percent(str){
+    function percentOne(str){
       if (!str) return null;
       const m = /(\d{1,3})\s*%/.exec(str);
       return m ? parseFloat(m[1]) : null;
     }
-    function effectivePrice(d){
-      // Base from display_price -> price_info
-      let base = dollars(d.display_price) ?? dollars(d.price_info);
+
+    // Compute numeric price and % off once
+    function derive(d){
+      // Base price from display_price -> price_info
+      let price = dollarsOne(d.display_price) ?? dollarsOne(d.price_info);
+
+      // Coupon text might change effective price
       const couponText = (d.coupon || d.price_info || "").toLowerCase();
-      const dollarOff = dollars(couponText);      // "$50 off", "$4.60 coupon"
-      const pctOff    = percent(couponText);      // "Save 10% at checkout"
-      if (base != null){
-        if (pctOff != null) base = +(base * (1 - pctOff/100)).toFixed(2);
-        if (dollarOff != null) base = Math.max(0, +(base - dollarOff).toFixed(2));
+      const dollarOff = dollarsOne(couponText);
+      const pctOffCoupon = percentOne(couponText);
+
+      if (price != null){
+        if (pctOffCoupon != null) price = +(price * (1 - pctOffCoupon/100)).toFixed(2);
+        if (dollarOff != null) price = Math.max(0, +(price - dollarOff).toFixed(2));
       }
-      return base; // may be null
-    }
-    function discountPercent(d){
-      const cur = effectivePrice(d);
-      if (cur == null) return percent(d.coupon || d.price_info);
-      let was = null;
-      const info = d.price_info || "";
-      const money = [...info.matchAll(moneyRx)].map(m=>parseFloat(m[1].replace(/,/g,"")));
-      if (info.toLowerCase().includes("was") && money.length >= 2){
-        was = money[money.length-1];
+
+      // Infer % off
+      let pct = pctOffCoupon;
+      if (pct == null){
+        // Try “was $X” pattern
+        const info = d.price_info || "";
+        const monies = [...info.matchAll(moneyRx)].map(m => parseFloat(m[1].replace(/,/g,"")));
+        if (info.toLowerCase().includes("was") && monies.length >= 2 && price != null){
+          const was = monies[monies.length - 1];
+          if (was > 0 && price <= was) pct = Math.round(100 * (1 - price/was));
+        }
       }
-      const explicitPct = percent(d.coupon || d.price_info);
-      if (explicitPct != null) return explicitPct;
-      if (was != null && was > 0 && cur <= was) return Math.round(100 * (1 - cur/was));
-      return null;
-    }
-    function comparePriceAsc(a,b){
-      const pa = effectivePrice(a), pb = effectivePrice(b);
-      if (pa==null && pb==null) return 0;
-      if (pa==null) return 1;
-      if (pb==null) return -1;
-      return pa - pb;
-    }
-    const comparePriceDesc = (a,b) => -comparePriceAsc(a,b);
-    function comparePctOffDesc(a,b){
-      const pa = discountPercent(a), pb = discountPercent(b);
-      if (pa==null && pb==null) return 0;
-      if (pa==null) return 1;
-      if (pb==null) return -1;
-      return pb - pa;
+      return { ...d, __price: price, __pctOff: pct };
     }
 
     // ---------- UI helpers ----------
@@ -174,16 +167,16 @@
       return el;
     }
 
-    function clientFilter(src){
+    // ---------- Filtering & Sorting ----------
+    function filterList(src){
       const q = ($q.value || "").trim().toLowerCase();
-      const min$ = $minPrice.value ? parseFloat($minPrice.value) : null;
-      const max$ = $maxPrice.value ? parseFloat($maxPrice.value) : null;
-      const minPct = $minPct.value ? parseFloat($minPct.value) : null;
+      const min$ = $minPrice.value !== "" ? parseFloat($minPrice.value) : null;
+      const max$ = $maxPrice.value !== "" ? parseFloat($maxPrice.value) : null;
+      const minPct = $minPct.value !== "" ? parseFloat($minPct.value) : null;
 
       return src.filter(d => {
         // category
-        const catOK = (activeCat === "all") || ((d.category || "other") === activeCat);
-        if (!catOK) return false;
+        if (!(activeCat === "all" || (d.category || "other") === activeCat)) return false;
 
         // search
         if (q){
@@ -197,60 +190,77 @@
         }
 
         // price range
-        const p = effectivePrice(d);
-        if (min$ != null && (p == null || p < min$)) return false;
-        if (max$ != null && (p == null || p > max$)) return false;
+        if (min$ != null && (d.__price == null || d.__price < min$)) return false;
+        if (max$ != null && (d.__price == null || d.__price > max$)) return false;
 
-        // percent off
-        const pct = discountPercent(d);
-        if (minPct != null && (pct == null || pct < minPct)) return false;
+        // minimum % off
+        if (minPct != null && (d.__pctOff == null || d.__pctOff < minPct)) return false;
 
         return true;
       });
     }
 
-    function clientSort(list){
+    function sortList(list){
       const mode = $sort.value;
       const arr = list.slice();
-      if (mode === "priceAsc") arr.sort(comparePriceAsc);
-      else if (mode === "priceDesc") arr.sort(comparePriceDesc);
-      else if (mode === "pctOff") arr.sort(comparePctOffDesc);
-      // else newest: keep original order (loader already returns newest → oldest)
+
+      if (mode === "priceAsc"){
+        arr.sort((a,b) => {
+          const A = a.__price ?? Number.POSITIVE_INFINITY;
+          const B = b.__price ?? Number.POSITIVE_INFINITY;
+          return A - B;
+        });
+      } else if (mode === "priceDesc"){
+        arr.sort((a,b) => {
+          const A = a.__price ?? Number.NEGATIVE_INFINITY;
+          const B = b.__price ?? Number.NEGATIVE_INFINITY;
+          return B - A;
+        });
+      } else if (mode === "pctOff"){
+        arr.sort((a,b) => {
+          const A = a.__pctOff ?? -1;
+          const B = b.__pctOff ?? -1;
+          return B - A;
+        });
+      }
+      // “newest” keeps original order (already newest→oldest from loader)
       return arr;
     }
 
-    async function refresh(){
-      const filtered = clientSort(clientFilter(allDeals));
-      // update count
+    function refresh(){
+      const filtered = sortList(filterList(deals));
       $count.textContent = `${filtered.length} deal${filtered.length===1?'':'s'}`;
-
-      // render directly from the filtered list (no loader stub)
       ForgeFinds.renderFromList(filtered, "#deals");
 
-      // empty state hint
       const none = filtered.length === 0;
       $hint.style.display = none ? "block" : "none";
       if (none){
         $hint.textContent = preview
           ? "No deals match your filters."
-          : "No live deals match your filters. For scheduled items, append ?preview=1&pin=4242 to the URL.";
+          : "No live deals match your filters. For scheduled items, append ?preview=1&pin=4242.";
       }
     }
 
     async function init(){
-      // Load deals (live or live+scheduled)
+      // Load (live or live+scheduled)
       allDeals = await ForgeFinds.loadDeals({ includeScheduled: preview });
 
+      // Derive numeric fields once
+      deals = allDeals.map(derive);
+
       // Build category pills
-      const cats = uniqueCategories(allDeals);
+      const cats = uniqueCategories(deals);
       $cats.innerHTML = "";
       cats.forEach((c, i) => $cats.appendChild(pill(c, i===0)));
 
-      // Wire events
-      [$q, $sort, $minPrice, $maxPrice, $minPct].forEach(el => el.addEventListener("input", refresh));
+      // Wire events (use both input & change to catch mobile/desktop)
+      [$q, $minPrice, $maxPrice, $minPct].forEach(el => {
+        el.addEventListener("input", refresh);
+        el.addEventListener("change", refresh);
+      });
       $sort.addEventListener("change", refresh);
 
-      // First paint
+      // Initial paint
       refresh();
     }
 
