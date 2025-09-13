@@ -33,20 +33,20 @@
     .pill[data-active="1"]{background:#1b2130}
 
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
-    .deal-card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+    .deal-card{background:#12151d;border:1px solid #202635;border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
     .deal-card .imgwrap{display:block;background:#0b0d10}
     .deal-card img{width:100%;height:220px;object-fit:cover}
     .deal-card .content{padding:12px 14px}
     .deal-card .title{font-size:1.05rem;line-height:1.25;margin:0 0 6px}
-    .deal-card .desc{color:var(--muted);font-size:.9rem;margin:0 0 10px}
+    .deal-card .desc{color:#a7b0bf;font-size:.9rem;margin:0 0 10px}
     .deal-card .meta{display:flex;align-items:center;gap:8px;margin:0 0 10px;flex-wrap:wrap}
-    .price{background:var(--goodbg);color:var(--good);padding:4px 8px;border-radius:8px;font-weight:600}
-    .badge.coupon{background:var(--couponbg);color:var(--couponfg);padding:4px 8px;border-radius:8px;font-weight:600}
-    .badge.off{background:#1b1530;color:#c9a7ff;padding:4px 8px;border-radius:8px;font-weight:600}
-    .cta{display:inline-block;background:var(--accent);color:#0b0d10;font-weight:700;border-radius:10px;padding:10px 12px;text-align:center}
-    .empty{color:var(--muted)}
-    .count{color:var(--muted);font-size:.9rem}
-    .hint{color:var(--muted);font-size:.9rem;margin-top:10px}
+    .price{background:#1e2a1e;color:#9ef199;padding:4px 8px;border-radius:8px;font-weight:600}
+    .badge.coupon{background:#19233a;color:#9dc4ff;padding:4px 8px;border-radius:8px;font-weight:600}
+    .badge.off{background:#1b1530;color:#c9a7ff;padding:4px 8px;border-radius:8px;font-weight:700}
+    .cta{display:inline-block;background:#f97316;color:#0b0d10;font-weight:700;border-radius:10px;padding:10px 12px;text-align:center}
+    .empty{color:#a7b0bf}
+    .count{color:#a7b0bf;font-size:.9rem}
+    .hint{color:#a7b0bf;font-size:.9rem;margin-top:10px}
   </style>
   <script src="/assets/deals.js" defer></script>
 </head>
@@ -87,12 +87,12 @@
   </main>
 
   <script>
-    // ---------- Hidden Preview ----------
+    // ---------- Hidden preview gate ----------
     const PREVIEW_PIN = "4242";
     const url = new URL(location.href);
     const preview = url.searchParams.get("preview") === "1" && (url.searchParams.get("pin") || "") === PREVIEW_PIN;
 
-    // ---------- DOM ----------
+    // DOM refs
     const $q = document.getElementById("q");
     const $sort = document.getElementById("sort");
     const $cats = document.getElementById("cats");
@@ -102,54 +102,11 @@
     const $minPct = document.getElementById("minPct");
     const $hint = document.getElementById("hint");
 
-    // ---------- State ----------
-    let allDeals = [];   // raw
-    let deals = [];      // augmented (with __price, __pctOff)
+    // State
+    let allDeals = [];   // with __price / __pctOff from loader
     let activeCat = "all";
 
-    // ---------- Parsing helpers ----------
-    const moneyRx = /\$([\d,]+(?:\.\d{1,2})?)/g;
-    function dollarsOne(str){
-      if (!str) return null;
-      const m = /\$([\d,]+(?:\.\d{1,2})?)/.exec(str);
-      return m ? parseFloat(m[1].replace(/,/g,"")) : null;
-    }
-    function percentOne(str){
-      if (!str) return null;
-      const m = /(\d{1,3})\s*%/.exec(str);
-      return m ? parseFloat(m[1]) : null;
-    }
-
-    // Compute numeric price and % off once
-    function derive(d){
-      // Base price from display_price -> price_info
-      let price = dollarsOne(d.display_price) ?? dollarsOne(d.price_info);
-
-      // Coupon text might change effective price
-      const couponText = (d.coupon || d.price_info || "").toLowerCase();
-      const dollarOff = dollarsOne(couponText);
-      const pctOffCoupon = percentOne(couponText);
-
-      if (price != null){
-        if (pctOffCoupon != null) price = +(price * (1 - pctOffCoupon/100)).toFixed(2);
-        if (dollarOff != null) price = Math.max(0, +(price - dollarOff).toFixed(2));
-      }
-
-      // Infer % off
-      let pct = pctOffCoupon;
-      if (pct == null){
-        // Try “was $X” pattern
-        const info = d.price_info || "";
-        const monies = [...info.matchAll(moneyRx)].map(m => parseFloat(m[1].replace(/,/g,"")));
-        if (info.toLowerCase().includes("was") && monies.length >= 2 && price != null){
-          const was = monies[monies.length - 1];
-          if (was > 0 && price <= was) pct = Math.round(100 * (1 - price/was));
-        }
-      }
-      return { ...d, __price: price, __pctOff: pct };
-    }
-
-    // ---------- UI helpers ----------
+    // UI helpers
     function uniqueCategories(items){
       const set = new Set(items.map(d => (d.category || "other")));
       return ["all", ...Array.from(set).sort()];
@@ -167,7 +124,7 @@
       return el;
     }
 
-    // ---------- Filtering & Sorting ----------
+    // Filtering / sorting
     function filterList(src){
       const q = ($q.value || "").trim().toLowerCase();
       const min$ = $minPrice.value !== "" ? parseFloat($minPrice.value) : null;
@@ -175,25 +132,15 @@
       const minPct = $minPct.value !== "" ? parseFloat($minPct.value) : null;
 
       return src.filter(d => {
-        // category
         if (!(activeCat === "all" || (d.category || "other") === activeCat)) return false;
 
-        // search
         if (q){
-          const hay = [
-            d.title || "",
-            d.description || "",
-            (d.tags || []).join(" "),
-            d.category || ""
-          ].join(" ").toLowerCase();
+          const hay = [d.title||"", d.description||"", (d.tags||[]).join(" "), d.category||""].join(" ").toLowerCase();
           if (!hay.includes(q)) return false;
         }
 
-        // price range
         if (min$ != null && (d.__price == null || d.__price < min$)) return false;
         if (max$ != null && (d.__price == null || d.__price > max$)) return false;
-
-        // minimum % off
         if (minPct != null && (d.__pctOff == null || d.__pctOff < minPct)) return false;
 
         return true;
@@ -203,32 +150,19 @@
     function sortList(list){
       const mode = $sort.value;
       const arr = list.slice();
-
       if (mode === "priceAsc"){
-        arr.sort((a,b) => {
-          const A = a.__price ?? Number.POSITIVE_INFINITY;
-          const B = b.__price ?? Number.POSITIVE_INFINITY;
-          return A - B;
-        });
+        arr.sort((a,b) => (a.__price ?? Infinity) - (b.__price ?? Infinity));
       } else if (mode === "priceDesc"){
-        arr.sort((a,b) => {
-          const A = a.__price ?? Number.NEGATIVE_INFINITY;
-          const B = b.__price ?? Number.NEGATIVE_INFINITY;
-          return B - A;
-        });
+        arr.sort((a,b) => (b.__price ?? -Infinity) - (a.__price ?? -Infinity));
       } else if (mode === "pctOff"){
-        arr.sort((a,b) => {
-          const A = a.__pctOff ?? -1;
-          const B = b.__pctOff ?? -1;
-          return B - A;
-        });
+        arr.sort((a,b) => (b.__pctOff ?? -1) - (a.__pctOff ?? -1));
       }
-      // “newest” keeps original order (already newest→oldest from loader)
+      // newest: leave as-is (loader returned newest → oldest)
       return arr;
     }
 
     function refresh(){
-      const filtered = sortList(filterList(deals));
+      const filtered = sortList(filterList(allDeals));
       $count.textContent = `${filtered.length} deal${filtered.length===1?'':'s'}`;
       ForgeFinds.renderFromList(filtered, "#deals");
 
@@ -237,30 +171,26 @@
       if (none){
         $hint.textContent = preview
           ? "No deals match your filters."
-          : "No live deals match your filters. For scheduled items, append ?preview=1&pin=4242.";
+          : "No live deals match your filters. For scheduled items, add ?preview=1&pin=4242 to the URL.";
       }
     }
 
     async function init(){
-      // Load (live or live+scheduled)
       allDeals = await ForgeFinds.loadDeals({ includeScheduled: preview });
 
-      // Derive numeric fields once
-      deals = allDeals.map(derive);
-
-      // Build category pills
-      const cats = uniqueCategories(deals);
+      // Build categories
+      const cats = uniqueCategories(allDeals);
       $cats.innerHTML = "";
       cats.forEach((c, i) => $cats.appendChild(pill(c, i===0)));
 
-      // Wire events (use both input & change to catch mobile/desktop)
+      // Wire events
       [$q, $minPrice, $maxPrice, $minPct].forEach(el => {
         el.addEventListener("input", refresh);
         el.addEventListener("change", refresh);
       });
+      $sort.addEventListener("input", refresh);
       $sort.addEventListener("change", refresh);
 
-      // Initial paint
       refresh();
     }
 
