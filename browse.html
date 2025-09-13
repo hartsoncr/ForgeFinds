@@ -9,17 +9,37 @@
   <link rel="icon" href="/forgefinds-favicon.png">
   <link rel="preconnect" href="https://m.media-amazon.com">
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;margin:0;background:#0f1115;color:#e6edf6}
-    header{padding:18px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #202635;background:#0f1115;position:sticky;top:0;z-index:2}
+    :root{
+      --bg:#0f1115;--card:#12151d;--line:#202635;--text:#e6edf6;--muted:#a7b0bf;
+      --accent:#f97316;--good:#9ef199;--goodbg:#1e2a1e;--couponbg:#19233a;--couponfg:#9dc4ff
+    }
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;margin:0;background:var(--bg);color:var(--text)}
+    header{padding:18px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:2}
     header img{width:28px;height:28px}
     a.logo{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none}
     main{padding:20px}
-    .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:6px 0 18px}
-    input[type="search"]{padding:10px 12px;border-radius:12px;border:1px solid #202635;background:#0b0d10;color:#e6edf6;min-width:260px}
+    .toolbar{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;margin:6px 0 16px}
+    .subbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 18px}
+    input[type="search"]{padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#0b0d10;color:var(--text);min-width:260px}
+    select{padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#0b0d10;color:var(--text)}
     .pills{display:flex;flex-wrap:wrap;gap:8px}
-    .pill{padding:7px 11px;border:1px solid #202635;border-radius:999px;background:#0b0d10;color:#e6edf6;cursor:pointer;font-size:.9rem}
+    .pill{padding:7px 11px;border:1px solid var(--line);border-radius:999px;background:#0b0d10;color:var(--text);cursor:pointer;font-size:.9rem}
     .pill[data-active="1"]{background:#1b2130}
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+    .deal-card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+    .deal-card .imgwrap{display:block;background:#0b0d10}
+    .deal-card img{width:100%;height:220px;object-fit:cover}
+    .deal-card .content{padding:12px 14px}
+    .deal-card .title{font-size:1.05rem;line-height:1.25;margin:0 0 6px}
+    .deal-card .desc{color:var(--muted);font-size:.9rem;margin:0 0 10px}
+    .deal-card .meta{display:flex;align-items:center;gap:8px;margin:0 0 10px;flex-wrap:wrap}
+    .price{background:var(--goodbg);color:var(--good);padding:4px 8px;border-radius:8px;font-weight:600}
+    .badge.coupon{background:var(--couponbg);color:var(--couponfg);padding:4px 8px;border-radius:8px;font-weight:600}
+    .badge.off{background:#1b1530;color:#c9a7ff;padding:4px 8px;border-radius:8px;font-weight:600}
+    .cta{display:inline-block;background:var(--accent);color:#0b0d10;font-weight:700;border-radius:10px;padding:10px 12px;text-align:center}
+    .empty{color:var(--muted)}
+    .count{color:var(--muted);font-size:.9rem}
   </style>
   <script src="/assets/deals.js" defer></script>
 </head>
@@ -35,33 +55,107 @@
   <main>
     <div class="toolbar">
       <input id="q" type="search" placeholder="Search deals…">
-      <div id="cats" class="pills" aria-label="Categories"></div>
-      <!-- No visible preview control -->
+      <label>
+        <select id="sort">
+          <option value="newest">Sort: Newest</option>
+          <option value="priceAsc">Price: Low → High</option>
+          <option value="priceDesc">Price: High → Low</option>
+          <option value="pctOff">% Off (High → Low)</option>
+        </select>
+      </label>
     </div>
+
+    <div class="subbar">
+      <div id="cats" class="pills" aria-label="Categories"></div>
+      <span class="count" id="count"></span>
+    </div>
+
     <section class="grid" id="deals"></section>
   </main>
 
   <script>
     // -------- Hidden Preview with PIN -----------
-    // Change this PIN to anything you like
-    const PREVIEW_PIN = "4242";
-
+    const PREVIEW_PIN = "4242"; // <- change me
     const url = new URL(location.href);
-    const wantPreview = url.searchParams.get("preview") === "1";
-    const pin = url.searchParams.get("pin") || "";
-    const preview = wantPreview && pin === PREVIEW_PIN;
+    const preview = url.searchParams.get("preview") === "1" && (url.searchParams.get("pin") || "") === PREVIEW_PIN;
 
+    // DOM
     const $q = document.getElementById("q");
+    const $sort = document.getElementById("sort");
     const $cats = document.getElementById("cats");
+    const $count = document.getElementById("count");
 
+    // State
     let allDeals = [];
     let activeCat = "all";
 
+    // ---------- Utilities: price & discount parsing ----------
+    const moneyRx = /\$([\d,]+(?:\.\d{1,2})?)/g;
+    function dollars(str){
+      if (!str) return null;
+      const m = /\$([\d,]+(?:\.\d{1,2})?)/.exec(str);
+      return m ? parseFloat(m[1].replace(/,/g,"")) : null;
+    }
+    function percent(str){
+      if (!str) return null;
+      const m = /(\d{1,3})\s*%/.exec(str);
+      return m ? parseFloat(m[1]) : null;
+    }
+    function effectivePrice(d){
+      // Start with display_price -> price_info fallback -> null
+      let base = dollars(d.display_price) ?? dollars(d.price_info);
+      // Coupon text may indicate extra $ off or % off
+      const couponText = (d.coupon || d.price_info || "").toLowerCase();
+      const dollarOff = dollars(couponText);      // "$50 off", "$4.60 coupon"
+      const pctOff    = percent(couponText);      // "Save 10% at checkout"
+      if (base != null){
+        if (pctOff != null) base = +(base * (1 - pctOff/100)).toFixed(2);
+        if (dollarOff != null) base = Math.max(0, +(base - dollarOff).toFixed(2));
+      }
+      return base; // may be null if no price parsed
+    }
+    function comparePriceAsc(a,b){
+      const pa = effectivePrice(a), pb = effectivePrice(b);
+      if (pa==null && pb==null) return 0;
+      if (pa==null) return 1;
+      if (pb==null) return -1;
+      return pa - pb;
+    }
+    function comparePriceDesc(a,b){ return -comparePriceAsc(a,b); }
+    function discountPercent(d){
+      // Try to compute %off from "was $X" if present, else from explicit % coupon
+      const cur = effectivePrice(d);
+      if (cur == null) return null;
+      // Look for a "was $X" in price_info
+      let was = null;
+      const info = d.price_info || "";
+      const money = [...info.matchAll(moneyRx)].map(m=>parseFloat(m[1].replace(/,/g,"")));
+      if (info.toLowerCase().includes("was") && money.length >= 2){
+        // assume first is current, second is was
+        was = money[money.length-1];
+      }
+      // if % in coupon, just return it
+      const pct = percent(d.coupon || d.price_info);
+      if (pct != null) return pct;
+
+      if (was != null && was > 0 && cur <= was){
+        return Math.round(100 * (1 - cur/was));
+      }
+      return null;
+    }
+    function comparePctOffDesc(a,b){
+      const pa = discountPercent(a), pb = discountPercent(b);
+      if (pa==null && pb==null) return 0;
+      if (pa==null) return 1;
+      if (pb==null) return -1;
+      return pb - pa; // high → low
+    }
+
+    // ---------- UI helpers ----------
     function uniqueCategories(items){
       const set = new Set(items.map(d => (d.category || "other")));
       return ["all", ...Array.from(set).sort()];
     }
-
     function pill(label, active=false){
       const el = document.createElement("button");
       el.className = "pill";
@@ -91,20 +185,64 @@
       });
     }
 
+    function clientSort(list){
+      const mode = $sort.value;
+      const arr = list.slice();
+      if (mode === "priceAsc") arr.sort(comparePriceAsc);
+      else if (mode === "priceDesc") arr.sort(comparePriceDesc);
+      else if (mode === "pctOff") arr.sort(comparePctOffDesc);
+      else {
+        // newest = by publish_at/created_at desc (already what renderDeals does)
+        // We'll just leave order as-is.
+      }
+      return arr;
+    }
+
     async function refresh(){
-      const filtered = clientFilter(allDeals);
+      const filtered = clientSort(clientFilter(allDeals));
+      // update count
+      $count.textContent = `${filtered.length} deal${filtered.length===1?'':'s'}`;
+      // feed filtered list to the shared renderer
       const orig = ForgeFinds.loadDeals;
-      ForgeFinds.loadDeals = async () => filtered; // feed the filtered list
+      ForgeFinds.loadDeals = async () => filtered;
       await ForgeFinds.renderDeals({ mountSelector:"#deals", includeScheduled: preview, q: "" });
       ForgeFinds.loadDeals = orig;
+      // annotate cards with computed %off if available
+      annotateDiscountBadges();
+    }
+
+    function annotateDiscountBadges(){
+      // Add a “xx% off” badge when we computed it but JSON didn't have one
+      const cards = document.querySelectorAll(".deal-card");
+      cards.forEach(card => {
+        const title = card.querySelector(".title")?.textContent || "";
+        const d = allDeals.find(x => x.title === title);
+        if (!d) return;
+        const pct = discountPercent(d);
+        if (pct != null){
+          const meta = card.querySelector(".meta");
+          if (!meta) return;
+          // only add if coupon badge doesn't already express %
+          if (!/coupon|%/i.test((d.coupon||"")+ (d.price_info||""))){
+            const span = document.createElement("span");
+            span.className = "badge off";
+            span.textContent = `${pct}% off est.`;
+            meta.appendChild(span);
+          }
+        }
+      });
     }
 
     async function init(){
       allDeals = await ForgeFinds.loadDeals({ includeScheduled: preview });
+      // build category pills
       const cats = uniqueCategories(allDeals);
       $cats.innerHTML = "";
       cats.forEach((c, i) => $cats.appendChild(pill(c, i===0)));
+      // wire events
       $q.addEventListener("input", refresh);
+      $sort.addEventListener("change", refresh);
+      // first paint
       refresh();
     }
 
