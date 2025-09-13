@@ -1,6 +1,6 @@
 // /assets/deals.js
 
-/** ------ Helpers ------ */
+/** ------ Helpersk ------ */
 const FF = (() => {
   // Supports ISO with Z or timezone offsets like -04:00
   const parseISO = (s = "") => new Date(s);
