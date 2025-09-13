@@ -1,8 +1,7 @@
 // /assets/deals.js
 
-/** ------ Helpersk ------ */
+/** ------ Core helpers ------ */
 const FF = (() => {
-  // Supports ISO with Z or timezone offsets like -04:00
   const parseISO = (s = "") => new Date(s);
   const now = () => new Date();
 
@@ -12,7 +11,6 @@ const FF = (() => {
     const deals = await res.json();
 
     const n = now();
-
     const filtered = deals
       .filter(d => {
         const pub = parseISO(d.publish_at || d.created_at || "1970-01-01T00:00:00-04:00");
@@ -22,14 +20,53 @@ const FF = (() => {
       })
       .sort((a, b) => parseISO(b.publish_at || b.created_at) - parseISO(a.publish_at || a.created_at));
 
-    return filtered;
+    return filtered.map(deriveNumbers); // add __price & __pctOff once
+  }
+
+  /** ---------- Price / %off derivation ---------- */
+  const moneyRx = /\$([\d,]+(?:\.\d{1,2})?)/g;
+  function dollarsOne(str){
+    if (!str) return null;
+    const m = /\$([\d,]+(?:\.\d{1,2})?)/.exec(str);
+    return m ? parseFloat(m[1].replace(/,/g,"")) : null;
+  }
+  function percentOne(str){
+    if (!str) return null;
+    const m = /(\d{1,3})\s*%/.exec(str);
+    return m ? parseFloat(m[1]) : null;
+  }
+
+  function deriveNumbers(d){
+    let price = dollarsOne(d.display_price) ?? dollarsOne(d.price_info);
+    const couponText = (d.coupon || d.price_info || "").toLowerCase();
+    const dollarOff = dollarsOne(couponText);
+    const pctOffCoupon = percentOne(couponText);
+
+    if (price != null){
+      if (pctOffCoupon != null) price = +(price * (1 - pctOffCoupon/100)).toFixed(2);
+      if (dollarOff != null) price = Math.max(0, +(price - dollarOff).toFixed(2));
+    }
+
+    // infer % off
+    let pct = pctOffCoupon;
+    if (pct == null){
+      const info = d.price_info || "";
+      const monies = [...info.matchAll(moneyRx)].map(m => parseFloat(m[1].replace(/,/g,"")));
+      if (info.toLowerCase().includes("was") && monies.length >= 2 && price != null){
+        const was = monies[monies.length - 1];
+        if (was > 0 && price <= was) pct = Math.round(100 * (1 - price/was));
+      }
+    }
+
+    return { ...d, __price: price, __pctOff: pct };
   }
 
   function money(s) { return s || ""; }
 
   function dealCardHTML(d){
-    const price = d.display_price || d.price_info || "";
+    const priceText = d.display_price || d.price_info || "";
     const coupon = d.coupon ? `<span class="badge coupon" title="Extra savings">${d.coupon}</span>` : "";
+    const offBadge = (d.__pctOff != null) ? `<span class="badge off">${d.__pctOff}% off</span>` : "";
     const expired = parseISO(d.expires_at || "") <= now();
     const store = d.store || "Shop";
 
@@ -42,7 +79,8 @@ const FF = (() => {
         <h3 class="title">${escapeHTML(d.title || "")}</h3>
         <p class="desc">${escapeHTML(d.description || "")}</p>
         <div class="meta">
-          <span class="price">${money(price)}</span>
+          <span class="price">${money(priceText)}</span>
+          ${offBadge}
           ${coupon}
         </div>
         <a class="cta" href="${d.affiliate_url}" target="_blank" rel="nofollow noopener">Shop at ${escapeHTML(store)}</a>
@@ -75,6 +113,7 @@ const FF = (() => {
     .deal-card .meta{display:flex;align-items:center;gap:8px;margin:0 0 10px;flex-wrap:wrap}
     .price{background:var(--goodbg);color:var(--good);padding:4px 8px;border-radius:8px;font-weight:600}
     .badge.coupon{background:var(--couponbg);color:var(--couponfg);padding:4px 8px;border-radius:8px;font-weight:600}
+    .badge.off{background:#1b1530;color:#c9a7ff;padding:4px 8px;border-radius:8px;font-weight:700}
     .cta{display:inline-block;background:var(--accent);color:#0b0d10;font-weight:700;border-radius:10px;padding:10px 12px;text-align:center}
     .empty{color:var(--muted)}
     .expired{opacity:.55;filter:grayscale(30%)}
@@ -85,50 +124,28 @@ const FF = (() => {
     document.head.appendChild(style);
   }
 
-  function search(deals, q){
-    if (!q) return deals;
-    const s = q.toLowerCase();
-    return deals.filter(d =>
-      (d.title||"").toLowerCase().includes(s) ||
-      (d.description||"").toLowerCase().includes(s) ||
-      (d.tags||[]).join(" ").toLowerCase().includes(s)
-    );
-  }
-
   function basePath(){ return ""; } // root
 
   function escapeHTML(str=""){
     return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   }
 
-  return { loadDeals, renderList, injectStyles, search };
+  return { loadDeals, renderList, injectStyles };
 })();
 
 /** ------ Public API ------ */
 window.ForgeFinds = {
-  async renderDeals({ mountSelector="#deals", includeScheduled=false, q="" } = {}){
+  async renderDeals({ mountSelector="#deals", includeScheduled=false } = {}){
     try{
       FF.injectStyles();
-      const all = await FF.loadDeals({ includeScheduled });
-      const filtered = FF.search(all, q);
-      FF.renderList(filtered, mountSelector);
+      const list = await FF.loadDeals({ includeScheduled });
+      FF.renderList(list, mountSelector);
     }catch(err){
       console.error(err);
       const mount = document.querySelector(mountSelector);
       if (mount) mount.innerHTML = `<p class="empty">We couldn’t load deals right now.</p>`;
     }
   },
-  // expose raw loader (used elsewhere)
-  loadDeals: FF.loadDeals,
-  // NEW: render directly from a provided list (no loader)
-  renderFromList(list, mountSelector="#deals"){
-    try{
-      FF.injectStyles();
-      FF.renderList(Array.isArray(list) ? list : [], mountSelector);
-    }catch(err){
-      console.error(err);
-      const mount = document.querySelector(mountSelector);
-      if (mount) mount.innerHTML = `<p class="empty">We couldn’t load deals right now.</p>`;
-    }
-  }
+  loadDeals: (opts) => FF.loadDeals(opts),
+  renderFromList: (list, mount="#deals") => { FF.injectStyles(); FF.renderList(list || [], mount); }
 };
