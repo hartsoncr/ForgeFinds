@@ -2,7 +2,8 @@
 <script>
 /** ------ Helpers ------ */
 const FF = (() => {
-  const parseISO = (s = "") => new Date(s.replace("Z", "+00:00"));
+  // Updated parser: supports UTC "Z" or timezone offsets like "-04:00"
+  const parseISO = (s = "") => new Date(s);
   const now = () => new Date();
 
   async function loadDeals({ includeScheduled = false } = {}) {
@@ -12,8 +13,8 @@ const FF = (() => {
     const n = now();
 
     const filtered = deals.filter(d => {
-      const pub = parseISO(d.publish_at || d.created_at || "1970-01-01T00:00:00Z");
-      const exp = parseISO(d.expires_at || "9999-12-31T23:59:59Z");
+      const pub = parseISO(d.publish_at || d.created_at || "1970-01-01T00:00:00-04:00");
+      const exp = parseISO(d.expires_at || "9999-12-31T23:59:59-04:00");
       const isLive = pub <= n && exp > n;
       return includeScheduled ? true : isLive;
     }).sort((a, b) => parseISO(b.publish_at || b.created_at) - parseISO(a.publish_at || a.created_at));
@@ -26,7 +27,7 @@ const FF = (() => {
   function dealCardHTML(d){
     const price = d.display_price || d.price_info || "";
     const coupon = d.coupon ? `<span class="badge coupon" title="Extra savings">${d.coupon}</span>` : "";
-    const expired = (new Date((d.expires_at||"").replace("Z","+00:00"))) <= new Date();
+    const expired = parseISO(d.expires_at || "") <= now();
     const store = d.store || "Shop";
 
     return `
@@ -98,7 +99,6 @@ const FF = (() => {
 
   function basePath(){
     // Works for custom domains & user pages
-    // Change if your JSON lives elsewhere.
     return "";
   }
 
