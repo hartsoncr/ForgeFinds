@@ -34,7 +34,7 @@
     "affiliate_url": "https://www.amazon.com/dp/B0BKQS9BJZ",
     "tags": ["tesla-coil", "speaker", "music", "gadgets"],
     "category": "gadgets",
-    "created_at": "2025-09-10T00:00:00Z",
+    "created_at": "2025-09-10T22:00:00Z",
     "expires_at": "2025-09-30",
     "slug": "tesla-coil-music-speaker"
   },
@@ -47,8 +47,47 @@
     "affiliate_url": "https://amzn.to/48a0lK4",
     "tags": ["hologram", "fan", "projector", "gadgets"],
     "category": "gadgets",
-    "created_at": "2025-09-11T00:00:00Z",
+    "created_at": "2025-09-11T22:00:00Z",
     "expires_at": "2025-09-30",
     "slug": "missyou-3d-hologram-fan"
+  },
+  {
+    "title": "📅 Dragon Touch 10.1\" Smart Digital Calendar",
+    "description": "Organize your family’s life with a bright 10.1\" touchscreen calendar. Syncs with your phone and keeps chores, appointments, and reminders in one place. On sale now for $129.68 (was $169.99).",
+    "price_info": "$129.68 (was $169.99)",
+    "store": "Amazon",
+    "image_url": "https://m.media-amazon.com/images/I/61Wqtq5c3xL._AC_SL1500_.jpg",
+    "affiliate_url": "https://amzn.to/4n0IQAv",
+    "tags": ["calendar", "family-planner", "smart-home", "gadgets"],
+    "category": "smart-home",
+    "created_at": "2025-09-13T00:00:00Z",
+    "expires_at": "2025-09-30",
+    "slug": "dragon-touch-calendar-10"
+  },
+  {
+    "title": "📅 Dragon Touch 15.6\" Smart Digital Calendar",
+    "description": "The mid-size Dragon Touch smart calendar with a 15.6\" Full HD touchscreen. Perfect for wall or desk use. Syncs instantly with multiple devices to keep the family organized. Priced at $249.99.",
+    "price_info": "$249.99",
+    "store": "Amazon",
+    "image_url": "https://m.media-amazon.com/images/I/61HYm7OBwsL._AC_SL1500_.jpg",
+    "affiliate_url": "https://amzn.to/41M2KXG",
+    "tags": ["calendar", "family-planner", "smart-home", "gadgets"],
+    "category": "smart-home",
+    "created_at": "2025-09-13T00:05:00Z",
+    "expires_at": "2025-09-30",
+    "slug": "dragon-touch-calendar-15"
+  },
+  {
+    "title": "📅 Dragon Touch 21.5\" Smart Digital Calendar",
+    "description": "The ultimate family command center — a massive 21.5\" Full HD touchscreen calendar. Syncs with your phone and supports color-coded tasks for the whole household. $399.99 with a $50 coupon available.",
+    "price_info": "$399.99 (with $50 coupon)",
+    "store": "Amazon",
+    "image_url": "https://m.media-amazon.com/images/I/61FQ3TQl2mL._AC_SL1500_.jpg",
+    "affiliate_url": "https://amzn.to/4mi55Ro",
+    "tags": ["calendar", "family-planner", "smart-home", "gadgets"],
+    "category": "smart-home",
+    "created_at": "2025-09-13T00:10:00Z",
+    "expires_at": "2025-09-30",
+    "slug": "dragon-touch-calendar-21"
   }
 ]
