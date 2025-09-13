@@ -1,4 +1,4 @@
-// /assets/deals.js  (raw JavaScript, no <script> tags)
+// /assets/deals.js
 
 /** ------ Helpers ------ */
 const FF = (() => {
@@ -117,5 +117,7 @@ window.ForgeFinds = {
       const mount = document.querySelector(mountSelector);
       if (mount) mount.innerHTML = `<p class="empty">We couldn’t load deals right now.</p>`;
     }
-  }
+  },
+  // exposed for browse.html custom filtering
+  loadDeals: FF.loadDeals
 };
