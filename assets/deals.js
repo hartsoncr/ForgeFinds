@@ -2,7 +2,7 @@
   {
     "title": "⚡ 78% OFF MagSafe Power Bank! (5000mAh)",
     "description": "Slim, snap-on power for iPhone MagSafe. USB-C fast charging, great for travel, and priced under $20 while the sale lasts.",
-    "price_info": "-78% $19.99 (was $89.99)",
+    "price_info": "$19.99 (was $89.99)",
     "display_price": "$19.99",
     "store": "Amazon",
     "image_url": "https://m.media-amazon.com/images/I/61v0m+eU5NL._AC_SX679_.jpg",
@@ -17,7 +17,7 @@
   {
     "title": "⚡ 60W Super Fast USB-C Charger",
     "description": "Compact, travel-ready wall charger with 60W fast charging for phones, laptops, and tablets. Originally $25.99, now only $13.99!",
-    "price_info": "-46% $13.99 (was $25.99)",
+    "price_info": "$13.99 (was $25.99)",
     "display_price": "$13.99",
     "store": "Amazon",
     "image_url": "https://m.media-amazon.com/images/I/81kbq3oSpML._AC_SX679_.jpg",
@@ -30,9 +30,9 @@
     "slug": "60w-super-fast-charger"
   },
   {
-    "title": "Tesla Coil Music Speaker",
+    "title": "🎶 Tesla Coil Music Speaker",
     "description": "A plasma arc Tesla coil that plays music with lightning! Plug into your phone or laptop and watch sparks dance in sync with your songs. Normally pricey tech, but now only $45.99 — with an additional $4.60 off when you apply the coupon.",
-    "price_info": "$45.99 (with $4.60 coupon)",
+    "price_info": "$45.99 (with $4.60 coupon, was higher)",
     "display_price": "$45.99",
     "coupon": "$4.60 coupon",
     "store": "Amazon",
@@ -48,7 +48,7 @@
   {
     "title": "✨ Missyou 3D Hologram Fan Projector",
     "description": "This fan creates holograms in mid-air using hundreds of high-speed LEDs spinning invisibly. Load it with your own 3D animations or videos and watch sci-fi visuals hover in space. Perfect for parties, your desk, or holiday displays. Originally $99.99, now just $79.20.",
-    "price_info": "-21% $79.20 (was $99.99)",
+    "price_info": "$79.20 (was $99.99)",
     "display_price": "$79.20",
     "store": "Amazon",
     "image_url": "https://m.media-amazon.com/images/I/618RgbtndpL._AC_UF894,1000_QL80_FMwebp_.jpg",
@@ -63,7 +63,7 @@
   {
     "title": "📅 Dragon Touch 10.1\" Smart Digital Calendar",
     "description": "Organize your family’s life with a bright 10.1\" touchscreen calendar. Syncs with your phone and keeps chores, appointments, and reminders in one place. On sale now for $129.68 (was $169.99).",
-    "price_info": "-24% $129.68 (was $169.99)",
+    "price_info": "$129.68 (was $169.99)",
     "display_price": "$129.68",
     "store": "Amazon",
     "image_url": "https://m.media-amazon.com/images/I/71Kd8omFwHL._AC_UF1000,1000_QL80_FMwebp_.jpg",
@@ -109,7 +109,7 @@
   {
     "title": "⚙️ 1800W Blender & Grinder Combo (68oz) — Ice Crusher + Auto-Clean",
     "description": "High-torque 1800W motor pulverizes ice to snow in seconds. 68oz family pitcher + separate grinder cup for coffee/spices. Multi-speed, pulse, and auto-clean mode.",
-    "price_info": "-10% $99.99 (Save 10% at checkout)",
+    "price_info": "$99.99 (limited-time deal; Save 10% at checkout)",
     "display_price": "$99.99",
     "coupon": "Save 10% at checkout",
     "store": "Amazon",
@@ -121,35 +121,5 @@
     "publish_at": "2025-09-14T08:00:00-04:00",
     "expires_at": "2025-10-14T08:00:00-04:00",
     "slug": "psiidan-1800w-blender-grinder-68oz"
-  },
-  {
-    "title": "🔒 Eufy SoloCam E30 — 2K Solar Security Camera (No Fees)",
-    "description": "Peace of mind without monthly bills. The Eufy SoloCam E30 is a solar-powered 2K security camera with 360° pan, AI tracking, and no subscriptions required.",
-    "price_info": "-33% $99.99 (was $149.99)",
-    "display_price": "$99.99",
-    "store": "Amazon",
-    "image_url": "https://m.media-amazon.com/images/I/61s8F2bs-FL._AC_SY300_SX300_QL70_FMwebp_.jpg",
-    "affiliate_url": "https://amzn.to/42qdzP9",
-    "tags": ["security", "camera", "solar", "smart-home"],
-    "category": "smart-home",
-    "created_at": "2025-09-15T07:00:00-04:00",
-    "publish_at": "2025-09-15T07:00:00-04:00",
-    "expires_at": "2025-10-15T07:00:00-04:00",
-    "slug": "eufy-solocam-e30"
-  },
-  {
-    "title": "📽️ Smart 1080p Projector with WiFi, Bluetooth & Built-in Apps",
-    "description": "Bring movie night anywhere with this portable smart projector. Native 1080p with 4K support, WiFi + Bluetooth, and built-in apps like Netflix & Prime Video. Perfect for indoors or backyard parties.",
-    "price_info": "-35% $109.99 (was $169.99)",
-    "display_price": "$109.99",
-    "store": "Amazon",
-    "image_url": "https://m.media-amazon.com/images/I/71wrFlvVxCL._AC_SX679_.jpg",
-    "affiliate_url": "https://amzn.to/465fxXH",
-    "tags": ["projector", "home-theater", "smart-tech", "wifi", "bluetooth"],
-    "category": "gadgets",
-    "created_at": "2025-09-15T07:00:00-04:00",
-    "publish_at": "2025-09-16T07:00:00-04:00",
-    "expires_at": "2025-10-16T07:00:00-04:00",
-    "slug": "weilio-smart-projector-1080p"
   }
 ]
