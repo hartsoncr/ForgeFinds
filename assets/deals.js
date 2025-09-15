@@ -19,7 +19,7 @@ const FF = (() => {
         return includeScheduled ? true : isLive;
       })
       .sort((a, b) => parseISO(b.publish_at || b.created_at) - parseISO(a.publish_at || a.created_at))
-      .map(deriveNumbers); // add __price & __pctOff once
+      .map(deriveNumbers);
 
     return list;
   }
@@ -36,23 +36,21 @@ const FF = (() => {
     const m = /(\d{1,3})\s*%/.exec(str);
     return m ? parseFloat(m[1]) : null;
   }
-  // pull the value explicitly after the word "was"
   function extractWas(info=""){
     const m = /was[^$]*\$([\d,]+(?:\.\d{1,2})?)/i.exec(info);
     if (m) return parseFloat(m[1].replace(/,/g,""));
     const monies = [...info.matchAll(moneyRx)].map(m => parseFloat(m[1].replace(/,/g,"")));
     if (monies.length >= 2) {
       const first = monies[0], last = monies[monies.length-1];
-      if (last > first) return last; // heuristic
+      if (last > first) return last;
     }
     return null;
   }
 
   function deriveNumbers(d){
-    // Base (display current) price
     let price = dollarsOne(d.display_price) ?? dollarsOne(d.price_info);
 
-    // Only look at the COUPON field for extra $/% off
+    // Coupons
     const couponText = (d.coupon || "").toLowerCase();
     const dollarOff = dollarsOne(couponText);
     const pctOffCoupon = percentOne(couponText);
@@ -62,8 +60,8 @@ const FF = (() => {
       if (dollarOff != null)    price = Math.max(0, +(price - dollarOff).toFixed(2));
     }
 
-    // % off: prefer explicit coupon %, else try in price_info, else compute from "was $X"
-    let pct = pctOffCoupon ?? percentOne(d.price_info || "");
+    // % off: explicit > coupon > calc
+    let pct = percentOne(d.price_info || "") ?? pctOffCoupon;
     if (pct == null && price != null){
       const was = extractWas(d.price_info || "");
       if (was && was > 0 && price <= was) pct = Math.round(100 * (1 - price/was));
@@ -135,7 +133,7 @@ const FF = (() => {
     document.head.appendChild(style);
   }
 
-  function basePath(){ return ""; } // root
+  function basePath(){ return ""; }
 
   function escapeHTML(str=""){
     return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
