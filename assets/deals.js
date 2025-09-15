@@ -1,160 +1,155 @@
-// /assets/deals.js
-
-/** ------ Core helpers ------ */
-const FF = (() => {
-  const parseISO = (s = "") => new Date(s);
-  const now = () => new Date();
-
-  async function loadDeals({ includeScheduled = false } = {}) {
-    const res = await fetch(`${basePath()}/data/deals.json?cb=${Date.now()}`);
-    if (!res.ok) throw new Error(`Failed to load deals.json: ${res.status}`);
-    const deals = await res.json();
-
-    const n = now();
-    const list = deals
-      .filter(d => {
-        const pub = parseISO(d.publish_at || d.created_at || "1970-01-01T00:00:00-04:00");
-        const exp = parseISO(d.expires_at || "9999-12-31T23:59:59-04:00");
-        const isLive = pub <= n && exp > n;
-        return includeScheduled ? true : isLive;
-      })
-      .sort((a, b) => parseISO(b.publish_at || b.created_at) - parseISO(a.publish_at || a.created_at))
-      .map(deriveNumbers);
-
-    return list;
-  }
-
-  /** ---------- Price / %off derivation ---------- */
-  const moneyRx = /\$([\d,]+(?:\.\d{1,2})?)/g;
-  function dollarsOne(str){
-    if (!str) return null;
-    const m = /\$([\d,]+(?:\.\d{1,2})?)/.exec(str);
-    return m ? parseFloat(m[1].replace(/,/g,"")) : null;
-  }
-  function percentOne(str){
-    if (!str) return null;
-    const m = /(\d{1,3})\s*%/.exec(str);
-    return m ? parseFloat(m[1]) : null;
-  }
-  function extractWas(info=""){
-    const m = /was[^$]*\$([\d,]+(?:\.\d{1,2})?)/i.exec(info);
-    if (m) return parseFloat(m[1].replace(/,/g,""));
-    const monies = [...info.matchAll(moneyRx)].map(m => parseFloat(m[1].replace(/,/g,"")));
-    if (monies.length >= 2) {
-      const first = monies[0], last = monies[monies.length-1];
-      if (last > first) return last;
-    }
-    return null;
-  }
-
-  function deriveNumbers(d){
-    let price = dollarsOne(d.display_price) ?? dollarsOne(d.price_info);
-
-    // Coupons
-    const couponText = (d.coupon || "").toLowerCase();
-    const dollarOff = dollarsOne(couponText);
-    const pctOffCoupon = percentOne(couponText);
-
-    if (price != null){
-      if (pctOffCoupon != null) price = +(price * (1 - pctOffCoupon/100)).toFixed(2);
-      if (dollarOff != null)    price = Math.max(0, +(price - dollarOff).toFixed(2));
-    }
-
-    // % off: explicit > coupon > calc
-    let pct = percentOne(d.price_info || "") ?? pctOffCoupon;
-    if (pct == null && price != null){
-      const was = extractWas(d.price_info || "");
-      if (was && was > 0 && price <= was) pct = Math.round(100 * (1 - price/was));
-    }
-
-    return { ...d, __price: price, __pctOff: pct };
-  }
-
-  function money(s) { return s || ""; }
-
-  function dealCardHTML(d){
-    const priceText = d.display_price || d.price_info || "";
-    const offBadge = (d.__pctOff != null) ? `<span class="badge off">${d.__pctOff}% off</span>` : "";
-    const coupon = d.coupon ? `<span class="badge coupon" title="Extra savings">${d.coupon}</span>` : "";
-    const expired = parseISO(d.expires_at || "") <= now();
-    const store = d.store || "Shop";
-
-    return `
-    <article class="deal-card ${expired ? "expired": ""}">
-      <a class="imgwrap" href="${d.affiliate_url}" target="_blank" rel="nofollow noopener">
-        <img loading="lazy" src="${d.image_url}" alt="${escapeHTML(d.title || "")}">
-      </a>
-      <div class="content">
-        <h3 class="title">${escapeHTML(d.title || "")}</h3>
-        <p class="desc">${escapeHTML(d.description || "")}</p>
-        <div class="meta">
-          <span class="price">${money(priceText)}</span>
-          ${offBadge}
-          ${coupon}
-        </div>
-        <a class="cta" href="${d.affiliate_url}" target="_blank" rel="nofollow noopener">Shop at ${escapeHTML(store)}</a>
-      </div>
-    </article>`;
-  }
-
-  function renderList(deals, mountSelector="#deals"){
-    const mount = document.querySelector(mountSelector);
-    if (!mount) return;
-    if (!deals.length){
-      mount.innerHTML = `<p class="empty">No live deals yet. Check back soon.</p>`;
-      return;
-    }
-    mount.innerHTML = deals.map(dealCardHTML).join("");
-  }
-
-  function injectStyles(){
-    if (document.getElementById("ff-styles")) return;
-    const css = `
-    :root{--bg:#0f1115;--card:#12151d;--line:#202635;--text:#e6edf6;--muted:#a7b0bf;--accent:#f97316;--good:#9ef199;--goodbg:#1e2a1e;--couponbg:#19233a;--couponfg:#9dc4ff}
-    body{background:var(--bg);color:var(--text)}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
-    .deal-card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
-    .deal-card .imgwrap{display:block;background:#0b0d10}
-    .deal-card img{width:100%;height:220px;object-fit:cover}
-    .deal-card .content{padding:12px 14px}
-    .deal-card .title{font-size:1.05rem;line-height:1.25;margin:0 0 6px}
-    .deal-card .desc{color:var(--muted);font-size:.9rem;margin:0 0 10px}
-    .deal-card .meta{display:flex;align-items:center;gap:8px;margin:0 0 10px;flex-wrap:wrap}
-    .price{background:var(--goodbg);color:var(--good);padding:4px 8px;border-radius:8px;font-weight:600}
-    .badge.coupon{background:var(--couponbg);color:var(--couponfg);padding:4px 8px;border-radius:8px;font-weight:600}
-    .badge.off{background:#1b1530;color:#c9a7ff;padding:4px 8px;border-radius:8px;font-weight:700}
-    .cta{display:inline-block;background:var(--accent);color:#0b0d10;font-weight:700;border-radius:10px;padding:10px 12px;text-align:center}
-    .empty{color:var(--muted)}
-    .expired{opacity:.55;filter:grayscale(30%)}
-    `;
-    const style = document.createElement("style");
-    style.id = "ff-styles";
-    style.textContent = css;
-    document.head.appendChild(style);
-  }
-
-  function basePath(){ return ""; }
-
-  function escapeHTML(str=""){
-    return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  }
-
-  return { loadDeals, renderList, injectStyles };
-})();
-
-/** ------ Public API ------ */
-window.ForgeFinds = {
-  async renderDeals({ mountSelector="#deals", includeScheduled=false } = {}){
-    try{
-      FF.injectStyles();
-      const list = await FF.loadDeals({ includeScheduled });
-      FF.renderList(list, mountSelector);
-    }catch(err){
-      console.error(err);
-      const mount = document.querySelector(mountSelector);
-      if (mount) mount.innerHTML = `<p class="empty">We couldn’t load deals right now.</p>`;
-    }
+[
+  {
+    "title": "⚡ 78% OFF MagSafe Power Bank! (5000mAh)",
+    "description": "Slim, snap-on power for iPhone MagSafe. USB-C fast charging, great for travel, and priced under $20 while the sale lasts.",
+    "price_info": "-78% $19.99 (was $89.99)",
+    "display_price": "$19.99",
+    "store": "Amazon",
+    "image_url": "https://m.media-amazon.com/images/I/61v0m+eU5NL._AC_SX679_.jpg",
+    "affiliate_url": "https://amzn.to/3JUso6i",
+    "tags": ["magsafe", "charger", "iphone", "power-bank"],
+    "category": "chargers",
+    "created_at": "2025-09-09T22:00:00-04:00",
+    "publish_at": "2025-09-09T22:00:00-04:00",
+    "expires_at": "2025-10-09T22:00:00-04:00",
+    "slug": "magsafe-power-bank"
   },
-  loadDeals: (opts) => FF.loadDeals(opts),
-  renderFromList: (list, mount="#deals") => { FF.injectStyles(); FF.renderList(list || [], mount); }
-};
+  {
+    "title": "⚡ 60W Super Fast USB-C Charger",
+    "description": "Compact, travel-ready wall charger with 60W fast charging for phones, laptops, and tablets. Originally $25.99, now only $13.99!",
+    "price_info": "-46% $13.99 (was $25.99)",
+    "display_price": "$13.99",
+    "store": "Amazon",
+    "image_url": "https://m.media-amazon.com/images/I/81kbq3oSpML._AC_SX679_.jpg",
+    "affiliate_url": "https://amzn.to/3JMY2To",
+    "tags": ["charger", "usb-c", "power", "fast-charging"],
+    "category": "chargers",
+    "created_at": "2025-09-09T23:00:00-04:00",
+    "publish_at": "2025-09-09T23:00:00-04:00",
+    "expires_at": "2025-10-09T23:00:00-04:00",
+    "slug": "60w-super-fast-charger"
+  },
+  {
+    "title": "🎶 Tesla Coil Music Speaker",
+    "description": "A plasma arc Tesla coil that plays music with lightning! Plug into your phone or laptop and watch sparks dance in sync with your songs. Normally pricey tech, but now only $45.99 — with an additional $4.60 off when you apply the coupon.",
+    "price_info": "$45.99 (with $4.60 coupon)",
+    "display_price": "$45.99",
+    "coupon": "$4.60 coupon",
+    "store": "Amazon",
+    "image_url": "https://m.media-amazon.com/images/I/718cx-fwwrL._AC_SL1500_.jpg",
+    "affiliate_url": "https://www.amazon.com/dp/B0BKQS9BJZ",
+    "tags": ["tesla-coil", "speaker", "music", "gadgets"],
+    "category": "gadgets",
+    "created_at": "2025-09-10T22:00:00-04:00",
+    "publish_at": "2025-09-10T22:00:00-04:00",
+    "expires_at": "2025-10-10T22:00:00-04:00",
+    "slug": "tesla-coil-music-speaker"
+  },
+  {
+    "title": "✨ Missyou 3D Hologram Fan Projector",
+    "description": "This fan creates holograms in mid-air using hundreds of high-speed LEDs spinning invisibly. Load it with your own 3D animations or videos and watch sci-fi visuals hover in space. Perfect for parties, your desk, or holiday displays. Originally $99.99, now just $79.20.",
+    "price_info": "-21% $79.20 (was $99.99)",
+    "display_price": "$79.20",
+    "store": "Amazon",
+    "image_url": "https://m.media-amazon.com/images/I/618RgbtndpL._AC_UF894,1000_QL80_FMwebp_.jpg",
+    "affiliate_url": "https://amzn.to/48a0lK4",
+    "tags": ["hologram", "fan", "projector", "gadgets"],
+    "category": "gadgets",
+    "created_at": "2025-09-11T22:00:00-04:00",
+    "publish_at": "2025-09-11T22:00:00-04:00",
+    "expires_at": "2025-10-11T22:00:00-04:00",
+    "slug": "missyou-3d-hologram-fan"
+  },
+  {
+    "title": "📅 Dragon Touch 10.1\" Smart Digital Calendar",
+    "description": "Organize your family’s life with a bright 10.1\" touchscreen calendar. Syncs with your phone and keeps chores, appointments, and reminders in one place. On sale now for $129.68 (was $169.99).",
+    "price_info": "-24% $129.68 (was $169.99)",
+    "display_price": "$129.68",
+    "store": "Amazon",
+    "image_url": "https://m.media-amazon.com/images/I/71Kd8omFwHL._AC_UF1000,1000_QL80_FMwebp_.jpg",
+    "affiliate_url": "https://amzn.to/4n0IQAv",
+    "tags": ["calendar", "family-planner", "smart-home", "gadgets"],
+    "category": "smart-home",
+    "created_at": "2025-09-13T00:00:00-04:00",
+    "publish_at": "2025-09-13T00:00:00-04:00",
+    "expires_at": "2025-10-13T00:00:00-04:00",
+    "slug": "dragon-touch-calendar-10"
+  },
+  {
+    "title": "📅 Dragon Touch 15.6\" Smart Digital Calendar",
+    "description": "The mid-size Dragon Touch smart calendar with a 15.6\" Full HD touchscreen. Perfect for wall or desk use. Syncs instantly with multiple devices to keep the family organized. Priced at $249.99.",
+    "price_info": "$249.99",
+    "display_price": "$249.99",
+    "store": "Amazon",
+    "image_url": "https://m.media-amazon.com/images/I/61On6aZUN8L._AC_UF1000,1000_QL80_.jpg",
+    "affiliate_url": "https://amzn.to/41M2KXG",
+    "tags": ["calendar", "family-planner", "smart-home", "gadgets"],
+    "category": "smart-home",
+    "created_at": "2025-09-13T00:05:00-04:00",
+    "publish_at": "2025-09-13T00:05:00-04:00",
+    "expires_at": "2025-10-13T00:05:00-04:00",
+    "slug": "dragon-touch-calendar-15"
+  },
+  {
+    "title": "📅 Dragon Touch 21.5\" Smart Digital Calendar",
+    "description": "The ultimate family command center — a massive 21.5\" Full HD touchscreen calendar. Syncs with your phone and supports color-coded tasks for the whole household. $399.99 with a $50 coupon available.",
+    "price_info": "$399.99 (with $50 coupon)",
+    "display_price": "$399.99",
+    "coupon": "$50 off coupon",
+    "store": "Amazon",
+    "image_url": "https://m.media-amazon.com/images/I/61i8azqW-CL._AC_UF1000,1000_QL80_.jpg",
+    "affiliate_url": "https://amzn.to/4mi55Ro",
+    "tags": ["calendar", "family-planner", "smart-home", "gadgets"],
+    "category": "smart-home",
+    "created_at": "2025-09-13T00:10:00-04:00",
+    "publish_at": "2025-09-13T00:10:00-04:00",
+    "expires_at": "2025-10-13T00:10:00-04:00",
+    "slug": "dragon-touch-calendar-21"
+  },
+  {
+    "title": "⚙️ 1800W Blender & Grinder Combo (68oz) — Ice Crusher + Auto-Clean",
+    "description": "High-torque 1800W motor pulverizes ice to snow in seconds. 68oz family pitcher + separate grinder cup for coffee/spices. Multi-speed, pulse, and auto-clean mode.",
+    "price_info": "-10% $99.99 (Save 10% at checkout)",
+    "display_price": "$99.99",
+    "coupon": "Save 10% at checkout",
+    "store": "Amazon",
+    "image_url": "https://m.media-amazon.com/images/I/71S7g4p5uZL._AC_SX679_.jpg",
+    "affiliate_url": "https://amzn.to/4miBOpz",
+    "tags": ["kitchen", "blender", "grinder", "ice-crusher"],
+    "category": "kitchen",
+    "created_at": "2025-09-14T08:00:00-04:00",
+    "publish_at": "2025-09-14T08:00:00-04:00",
+    "expires_at": "2025-10-14T08:00:00-04:00",
+    "slug": "psiidan-1800w-blender-grinder-68oz"
+  },
+  {
+    "title": "🔒 Eufy SoloCam E30 — 2K Solar Security Camera (No Fees)",
+    "description": "Peace of mind without monthly bills. The Eufy SoloCam E30 is a solar-powered 2K security camera with 360° pan, AI tracking, and no subscriptions required.",
+    "price_info": "-33% $99.99 (was $149.99)",
+    "display_price": "$99.99",
+    "store": "Amazon",
+    "image_url": "https://m.media-amazon.com/images/I/61s8F2bs-FL._AC_SY300_SX300_QL70_FMwebp_.jpg",
+    "affiliate_url": "https://amzn.to/42qdzP9",
+    "tags": ["security", "camera", "solar", "smart-home"],
+    "category": "smart-home",
+    "created_at": "2025-09-15T07:00:00-04:00",
+    "publish_at": "2025-09-15T07:00:00-04:00",
+    "expires_at": "2025-10-15T07:00:00-04:00",
+    "slug": "eufy-solocam-e30"
+  },
+  {
+    "title": "📽️ Smart 1080p Projector with WiFi, Bluetooth & Built-in Apps",
+    "description": "Bring movie night anywhere with this portable smart projector. Native 1080p with 4K support, WiFi + Bluetooth, and built-in apps like Netflix & Prime Video. Perfect for indoors or backyard parties.",
+    "price_info": "-35% $109.99 (was $169.99)",
+    "display_price": "$109.99",
+    "store": "Amazon",
+    "image_url": "https://m.media-amazon.com/images/I/71wrFlvVxCL._AC_SX679_.jpg",
+    "affiliate_url": "https://amzn.to/465fxXH",
+    "tags": ["projector", "home-theater", "smart-tech", "wifi", "bluetooth"],
+    "category": "gadgets",
+    "created_at": "2025-09-15T07:00:00-04:00",
+    "publish_at": "2025-09-16T07:00:00-04:00",
+    "expires_at": "2025-10-16T07:00:00-04:00",
+    "slug": "weilio-smart-projector-1080p"
+  }
+]
