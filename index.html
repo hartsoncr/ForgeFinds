@@ -5,16 +5,17 @@
   <title>ForgeFinds — Cool Tech & Deals</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="/forgefinds-favicon.png">
-  <link rel="preconnect" href="https://m.media-amazon.com">
   <style>
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;margin:0;background:#0f1115;color:#e6edf6}
-    header{padding:18px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #202635;background:#0f1115;position:sticky;top:0;z-index:2}
-    header img{width:28px;height:28px}
+    header{padding:18px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #202635;position:sticky;top:0;background:#0f1115}
     a.logo{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none}
+    header img{width:28px;height:28px}
     main{padding:20px}
-    h1{margin:10px 0 18px;font-size:1.4rem;color:#e6edf6}
-    .sub{color:#a7b0bf;margin:-10px 0 18px;font-size:.95rem}
+    h1{margin:18px 0 6px}
+    p.lede{color:#a7b0bf;margin:0 0 18px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
   </style>
+  <!-- Defer so the DOM exists before the script runs -->
   <script src="/assets/deals.js" defer></script>
 </head>
 <body>
@@ -28,13 +29,18 @@
 
   <main>
     <h1>Latest deals!</h1>
-    <p class="sub">Fresh tech finds, updated as we post.</p>
+    <p class="lede">Fresh tech finds, updated as we post.</p>
     <section class="grid" id="deals"></section>
   </main>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    // Only live items on the homepage
+    window.addEventListener("DOMContentLoaded", () => {
       ForgeFinds.renderDeals({ mountSelector:"#deals", includeScheduled:false });
+      // Debug surface: show count in console so we know it ran
+      ForgeFinds.loadDeals({ includeScheduled:false }).then(list => {
+        console.log("[ForgeFinds] Home live deals:", list.length);
+      }).catch(e => console.error("[ForgeFinds] load error", e));
     });
   </script>
 </body>
