@@ -108,4 +108,48 @@ const FF = (() => {
     :root{--bg:#0f1115;--card:#12151d;--line:#202635;--text:#e6edf6;--muted:#a7b0bf;--accent:#f97316;--good:#9ef199;--goodbg:#1e2a1e;--couponbg:#19233a;--couponfg:#9dc4ff}
     body{background:var(--bg);color:var(--text)}
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
-    .deal-card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    .deal-card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+    .deal-card .imgwrap{display:block;background:#0b0d10}
+    .deal-card img{width:100%;height:220px;object-fit:cover}
+    .deal-card .content{padding:12px 14px}
+    .deal-card .title{font-size:1.05rem;line-height:1.25;margin:0 0 6px}
+    .deal-card .desc{color:var(--muted);font-size:.9rem;margin:0 0 10px}
+    .deal-card .meta{display:flex;align-items:center;gap:8px;margin:0 0 10px;flex-wrap:wrap}
+    .price{background:var(--goodbg);color:var(--good);padding:4px 8px;border-radius:8px;font-weight:600}
+    .badge.coupon{background:var(--couponbg);color:var(--couponfg);padding:4px 8px;border-radius:8px;font-weight:600}
+    .badge.off{background:#1b1530;color:#c9a7ff;padding:4px 8px;border-radius:8px;font-weight:700}
+    .cta{display:inline-block;background:var(--accent);color:#0b0d10;font-weight:700;border-radius:10px;padding:10px 12px;text-align:center;text-decoration:none}
+    .empty{color:var(--muted)}
+    .expired{opacity:.55;filter:grayscale(30%)}
+    `;
+    const style = document.createElement("style");
+    style.id = "ff-styles";
+    style.textContent = css;
+    document.head.appendChild(style);
+  }
+
+  function basePath(){ return ""; }
+
+  function escapeHTML(str=""){
+    return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  return { loadDeals, renderList, injectStyles };
+})();
+
+/** ------ Public API ------ */
+window.ForgeFinds = {
+  async renderDeals({ mountSelector="#deals", includeScheduled=false } = {}){
+    try{
+      FF.injectStyles();
+      const list = await FF.loadDeals({ includeScheduled });
+      FF.renderList(list, mountSelector);
+    }catch(err){
+      console.error(err);
+      const mount = document.querySelector(mountSelector);
+      if (mount) mount.innerHTML = `<p class="empty">We couldn’t load deals right now.</p>`;
+    }
+  },
+  loadDeals: (opts) => FF.loadDeals(opts),
+  renderFromList: (list, mount="#deals") => { FF.injectStyles(); FF.renderList(list || [], mount); }
+};
