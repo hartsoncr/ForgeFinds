@@ -2,51 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Browse Deals — ForgeFinds</title>
+  <title>Browse all Deals — ForgeFinds</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex, noarchive">
   <link rel="icon" href="/forgefinds-favicon.png">
-  <link rel="preconnect" href="https://m.media-amazon.com">
   <style>
-    :root{
-      --bg:#0f1115;--card:#12151d;--line:#202635;--text:#e6edf6;--muted:#a7b0bf;
-      --accent:#f97316;--good:#9ef199;--goodbg:#1e2a1e;--couponbg:#19233a;--couponfg:#9dc4ff
-    }
-    *{box-sizing:border-box}
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;margin:0;background:var(--bg);color:var(--text)}
-    header{padding:18px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:2}
-    header img{width:28px;height:28px}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;margin:0;background:#0f1115;color:#e6edf6}
+    header{padding:18px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #202635;position:sticky;top:0;background:#0f1115}
     a.logo{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none}
+    header img{width:28px;height:28px}
     main{padding:20px}
-
-    .toolbar{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;margin:6px 0 16px}
-    .subbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 18px}
-
-    input[type="search"], input[type="number"], select{
-      padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#0b0d10;color:var(--text)
-    }
-    input[type="number"]{width:110px}
-    select{min-width:180px}
-
-    .pills{display:flex;flex-wrap:wrap;gap:8px}
-    .pill{padding:7px 11px;border:1px solid var(--line);border-radius:999px;background:#0b0d10;color:var(--text);cursor:pointer;font-size:.9rem}
-    .pill[data-active="1"]{background:#1b2130}
-
+    .controls{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 18px}
+    select,input{background:#12151d;color:#e6edf6;border:1px solid #202635;border-radius:8px;padding:8px}
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
-    .deal-card{background:#12151d;border:1px solid #202635;border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
-    .deal-card .imgwrap{display:block;background:#0b0d10}
-    .deal-card img{width:100%;height:220px;object-fit:cover}
-    .deal-card .content{padding:12px 14px}
-    .deal-card .title{font-size:1.05rem;line-height:1.25;margin:0 0 6px}
-    .deal-card .desc{color:#a7b0bf;font-size:.9rem;margin:0 0 10px}
-    .deal-card .meta{display:flex;align-items:center;gap:8px;margin:0 0 10px;flex-wrap:wrap}
-    .price{background:#1e2a1e;color:#9ef199;padding:4px 8px;border-radius:8px;font-weight:600}
-    .badge.coupon{background:#19233a;color:#9dc4ff;padding:4px 8px;border-radius:8px;font-weight:600}
-    .badge.off{background:#1b1530;color:#c9a7ff;padding:4px 8px;border-radius:8px;font-weight:700}
-    .cta{display:inline-block;background:#f97316;color:#0b0d10;font-weight:700;border-radius:10px;padding:10px 12px;text-align:center}
-    .empty{color:#a7b0bf}
-    .count{color:#a7b0bf;font-size:.9rem}
-    .hint{color:#a7b0bf;font-size:.9rem;margin-top:10px}
+    .muted{color:#9aa7b1}
   </style>
   <script src="/assets/deals.js" defer></script>
 </head>
@@ -60,138 +28,98 @@
   </header>
 
   <main>
-    <div class="toolbar">
-      <input id="q" type="search" placeholder="Search deals…">
-      <label>
-        <select id="sort">
-          <option value="newest">Sort: Newest</option>
-          <option value="priceAsc">Price: Low → High</option>
-          <option value="priceDesc">Price: High → Low</option>
-          <option value="pctOff">% Off (High → Low)</option>
+    <h1>Browse all Deals</h1>
+    <div class="controls">
+      <label>Category
+        <select id="cat">
+          <option value="">All</option>
+          <option>chargers</option>
+          <option>gadgets</option>
+          <option>smart-home</option>
+          <option>kitchen</option>
         </select>
       </label>
-      <div>
-        <input id="minPrice" type="number" min="0" step="0.01" placeholder="Min $" title="Minimum price">
-        <input id="maxPrice" type="number" min="0" step="0.01" placeholder="Max $" title="Maximum price">
-        <input id="minPct"   type="number" min="0" max="100" step="1" placeholder="Min % off" title="Minimum % off">
-      </div>
+      <label>Sort
+        <select id="sort">
+          <option value="new">Newest</option>
+          <option value="price-asc">Price: Low → High</option>
+          <option value="price-desc">Price: High → Low</option>
+          <option value="off-desc">% Off: High → Low</option>
+        </select>
+      </label>
+      <label>Price min <input id="pmin" type="number" step="0.01" placeholder="0"></label>
+      <label>Price max <input id="pmax" type="number" step="0.01" placeholder="9999"></label>
+      <label>% off min <input id="omin" type="number" step="1" placeholder="0"></label>
+      <button id="apply">Apply</button>
+      <span id="count" class="muted"></span>
     </div>
-
-    <div class="subbar">
-      <div id="cats" class="pills" aria-label="Categories"></div>
-      <span class="count" id="count"></span>
-    </div>
-
-    <section class="grid" id="deals"></section>
-    <p class="hint" id="hint" style="display:none;"></p>
+    <section class="grid" id="list"></section>
   </main>
 
   <script>
-    // ---------- Hidden preview gate ----------
-    const PREVIEW_PIN = "4242";
-    const url = new URL(location.href);
-    const preview = url.searchParams.get("preview") === "1" && (url.searchParams.get("pin") || "") === PREVIEW_PIN;
+    let BASE = [];
+    const $ = sel => document.querySelector(sel);
 
-    // DOM refs
-    const $q = document.getElementById("q");
-    const $sort = document.getElementById("sort");
-    const $cats = document.getElementById("cats");
-    const $count = document.getElementById("count");
-    const $minPrice = document.getElementById("minPrice");
-    const $maxPrice = document.getElementById("maxPrice");
-    const $minPct = document.getElementById("minPct");
-    const $hint = document.getElementById("hint");
+    function run(){
+      const cat = $('#cat').value;
+      const sort = $('#sort').value;
+      const pmin = parseFloat($('#pmin').value || '0');
+      const pmax = parseFloat($('#pmax').value || '999999');
+      const omin = parseFloat($('#omin').value || '0');
 
-    // State
-    let allDeals = [];   // with __price / __pctOff from loader
-    let activeCat = "all";
+      let items = BASE.slice();
 
-    // UI helpers
-    function uniqueCategories(items){
-      const set = new Set(items.map(d => (d.category || "other")));
-      return ["all", ...Array.from(set).sort()];
-    }
-    function pill(label, active=false){
-      const el = document.createElement("button");
-      el.className = "pill";
-      el.dataset.active = active ? "1" : "0";
-      el.textContent = label;
-      el.addEventListener("click", () => {
-        activeCat = label;
-        document.querySelectorAll(".pill").forEach(p => p.dataset.active = (p.textContent === label) ? "1" : "0");
-        refresh();
+      // filter live only
+      const now = new Date();
+      items = items.filter(d => {
+        const pub = new Date(d.publish_at || d.created_at || '1970-01-01T00:00:00-04:00');
+        const exp = new Date(d.expires_at || '9999-12-31T23:59:59-04:00');
+        return pub <= now && exp > now;
       });
-      return el;
-    }
 
-    function filterList(src){
-      const q = ($q.value || "").trim().toLowerCase();
-      const min$ = $minPrice.value !== "" ? parseFloat($minPrice.value) : null;
-      const max$ = $maxPrice.value !== "" ? parseFloat($maxPrice.value) : null;
-      const minPct = $minPct.value !== "" ? parseFloat($minPct.value) : null;
+      // category
+      if (cat) items = items.filter(d => (d.category||'') === cat);
 
-      return src.filter(d => {
-        if (!(activeCat === "all" || (d.category || "other") === activeCat)) return false;
+      // derive numeric fields (uses same logic as deals.js)
+      items = items.map(d => d.__price!=null ? d : d);
 
-        if (q){
-          const hay = [d.title||"", d.description||"", (d.tags||[]).join(" "), d.category||""].join(" ").toLowerCase();
-          if (!hay.includes(q)) return false;
-        }
-
-        if (min$ != null && (d.__price == null || d.__price < min$)) return false;
-        if (max$ != null && (d.__price == null || d.__price > max$)) return false;
-        if (minPct != null && (d.__pctOff == null || d.__pctOff < minPct)) return false;
-        return true;
+      // price filter
+      items = items.filter(d => {
+        const price = d.__price != null ? d.__price : null;
+        if (price == null) return true; // keep unknowns
+        return price >= pmin && price <= pmax;
       });
-    }
 
-    function sortList(list){
-      const mode = $sort.value;
-      const arr = list.slice();
-      if (mode === "priceAsc"){
-        arr.sort((a,b) => (a.__price ?? Infinity) - (b.__price ?? Infinity));
-      } else if (mode === "priceDesc"){
-        arr.sort((a,b) => (b.__price ?? -Infinity) - (a.__price ?? -Infinity));
-      } else if (mode === "pctOff"){
-        arr.sort((a,b) => (b.__pctOff ?? -1) - (a.__pctOff ?? -1));
-      }
-      return arr; // newest keeps loader order
-    }
-
-    function refresh(){
-      const filtered = sortList(filterList(allDeals));
-      $count.textContent = `${filtered.length} deal${filtered.length===1?'':'s'}`;
-      ForgeFinds.renderFromList(filtered, "#deals");
-
-      const none = filtered.length === 0;
-      $hint.style.display = none ? "block" : "none";
-      if (none){
-        $hint.textContent = preview
-          ? "No deals match your filters."
-          : "No live deals match your filters. For scheduled items, add ?preview=1&pin=4242 to the URL.";
-      }
-    }
-
-    async function init(){
-      allDeals = await ForgeFinds.loadDeals({ includeScheduled: preview });
-
-      // Build categories
-      const cats = uniqueCategories(allDeals);
-      $cats.innerHTML = "";
-      cats.forEach((c, i) => $cats.appendChild(pill(c, i===0)));
-
-      // Wire events
-      [$q, $minPrice, $maxPrice, $minPct].forEach(el => {
-        el.addEventListener("input", refresh);
-        el.addEventListener("change", refresh);
+      // % off filter
+      items = items.filter(d => {
+        const off = d.__pctOff != null ? d.__pctOff : 0;
+        return off >= omin;
       });
-      $sort.addEventListener("input", refresh);
-      $sort.addEventListener("change", refresh);
 
-      refresh();
+      // sort
+      items.sort((a,b) => {
+        if (sort === 'price-asc') return (a.__price ?? 1e12) - (b.__price ?? 1e12);
+        if (sort === 'price-desc') return (b.__price ?? -1) - (a.__price ?? -1);
+        if (sort === 'off-desc') return (b.__pctOff ?? -1) - (a.__pctOff ?? -1);
+        // newest
+        const ad = new Date(a.publish_at || a.created_at);
+        const bd = new Date(b.publish_at || b.created_at);
+        return bd - ad;
+      });
+
+      $('#count').textContent = `${items.length} live deal${items.length!==1?'s':''}`;
+      ForgeFinds.renderFromList(items, '#list');
     }
 
-    document.addEventListener("DOMContentLoaded", init);
+    window.addEventListener('DOMContentLoaded', async () => {
+      const all = await ForgeFinds.loadDeals({ includeScheduled:true });
+      // We need derived fields for filters/sort; ensure deals.js ran deriveNumbers
+      BASE = all;
+      run();
+      $('#apply').addEventListener('click', run);
+      $('#cat').addEventListener('change', run);
+      $('#sort').addEventListener('change', run);
+    });
   </script>
 </body>
 </html>
