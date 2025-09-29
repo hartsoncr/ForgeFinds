@@ -158,7 +158,7 @@
     "price_info": "$499.00",
     "display_price": "$499.00",
     "store": "Amazon",
-    "image_url": "https://m.media-amazon.com/images/I/71RlrkTSOmL._AC_SY300_SX300_QL70_FMwebp_.jpg",
+    "image_url": "https://m.media-amazon.com/images/I/71R3y2e7jLL._AC_SX679_.jpg",
     "affiliate_url": "https://amzn.to/46i66o0",
     "tags": ["vr", "gaming", "meta-quest", "virtual-reality", "batman"],
     "category": "gaming",
@@ -166,5 +166,35 @@
     "publish_at": "2025-09-21T09:30:00-04:00",
     "expires_at": "2025-11-20T09:30:00-05:00",
     "slug": "meta-quest-3-512gb"
+  },
+  {
+    "title": "Amazon Fire TV Cube (Newest) — 4K, Wi-Fi 6E, Hands-Free with Alexa",
+    "description": "Amazon’s fastest Fire TV device with an octa-core processor and Wi-Fi 6E. Control your TV and soundbar hands-free, search with your voice, and stream in cinematic 4K with Dolby Vision/Atmos.",
+    "price_info": "$99.99 (was $139.99)",
+    "display_price": "$99.99",
+    "store": "Amazon",
+    "image_url": "https://m.media-amazon.com/images/I/61mVp80C93L._AC_SX679_.jpg",
+    "affiliate_url": "https://amzn.to/48sbrKF",
+    "tags": ["streaming", "4k", "alexa", "wifi-6e", "home-theater"],
+    "category": "streaming",
+    "created_at": "2025-09-29T12:00:00-04:00",
+    "publish_at": "2025-09-30T07:00:00-04:00",
+    "expires_at": "2025-11-29T07:00:00-05:00",
+    "slug": "amazon-fire-tv-cube-2025"
+  },
+  {
+    "title": "Amazon Fire HD 10 (Newest) — 10.1\" Full HD Tablet, 32GB, No Lockscreen Ads",
+    "description": "Vibrant 10.1\" Full HD display, octa-core processor, 3GB RAM, and 32GB storage with microSD expansion. Great for streaming, reading, browsing, and video calls—without lockscreen ads.",
+    "price_info": "$84.99 (was $154.99)",
+    "display_price": "$84.99",
+    "store": "Amazon",
+    "image_url": "https://m.media-amazon.com/images/I/61EfgCU1k7L._AC_SX679_.jpg",
+    "affiliate_url": "https://amzn.to/3IKRfJs",
+    "tags": ["tablet", "fire-hd", "streaming", "reading", "budget-tech"],
+    "category": "tablets",
+    "created_at": "2025-09-29T09:30:00-04:00",
+    "publish_at": "2025-09-29T09:30:00-04:00",
+    "expires_at": "2025-11-28T09:30:00-05:00",
+    "slug": "amazon-fire-hd-10-2025"
   }
 ]
