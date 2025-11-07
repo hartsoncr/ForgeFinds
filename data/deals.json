@@ -1,5 +1,5 @@
 {
-  "count": 13,
+  "count": 15,
   "deals": [
     {
       "title": "Weilio Mini 1080p Smart Projector w/ WiFi & Bluetooth",
@@ -107,6 +107,21 @@
       "slug": "meta-quest-3-512gb"
     },
     {
+      "title": "Amazon Fire TV Cube (Newest Model, 4K Ultra HD, AI-Powered Alexa)",
+      "description": "Fire TV Cube delivers ultra-fast 4K streaming with AI-powered search and hands-free Alexa. Control your TV, soundbar, and smart home devices — all with your voice. Smoothest Fire TV yet, 2X faster than Stick 4K Max.",
+      "price_info": "$99.99 (was $139.99)",
+      "display_price": "$99.99",
+      "store": "Amazon",
+      "image_url": "https://m.media-amazon.com/images/I/61mVp80C93L._AC_SX679_.jpg",
+      "affiliate_url": "https://amzn.to/48sbrKF",
+      "tags": ["streaming", "smart-home", "alexa", "4k"],
+      "category": "tech",
+      "created_at": "2025-11-06T12:00:00Z",
+      "publish_at": "2025-11-08T12:00:00Z",
+      "expires_at": "2026-01-07T12:00:00Z",
+      "slug": "fire-tv-cube-2025"
+    },
+    {
       "title": "Comfier Shiatsu Neck & Back Massager with Heat",
       "description": "Deep-knee Shiatsu massage with soothing heat. Targets neck, shoulders, and upper back with rotating nodes that mimic real hands. Portable, adjustable, and auto-shutoff for total comfort at home or in the office.",
       "price_info": "$79.99 (was $129.99)",
@@ -135,6 +150,21 @@
       "publish_at": "2025-11-07T12:30:00Z",
       "expires_at": "2026-01-06T12:30:00Z",
       "slug": "terramaster-f4-425-nas"
+    },
+    {
+      "title": "Drawing Robot for Kids with 150 Cards — Voice Interactive Educational Toy",
+      "description": "AI-powered drawing companion that teaches kids to sketch step-by-step using voice prompts. Includes 150 drawing cards, built-in music, and Montessori-based learning fun for ages 4–8.",
+      "price_info": "$62.68 (was $79.99)",
+      "display_price": "$62.68",
+      "store": "Amazon",
+      "image_url": "https://m.media-amazon.com/images/I/613iXiCLm1L._AC_SX679_.jpg",
+      "affiliate_url": "https://amzn.to/3ILJcvZ",
+      "tags": ["kids", "education", "robot", "toy", "learning"],
+      "category": "toys",
+      "created_at": "2025-11-07T12:00:00Z",
+      "publish_at": "2025-11-07T12:00:00Z",
+      "expires_at": "2026-01-06T12:00:00Z",
+      "slug": "drawing-robot-kids"
     }
   ]
 }
