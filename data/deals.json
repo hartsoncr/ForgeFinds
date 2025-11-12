@@ -1,5 +1,20 @@
 [
   {
+    "title": "TerraMaster F4-425 4-Bay NAS — Intel Quad-Core, 4 GB RAM, 2.5 GbE LAN",
+    "description": "Powerful 4-bay NAS for Plex, backups, and personal cloud. Intel quad-core CPU, 4 GB RAM (expandable), dual 2.5 GbE ports, and support for 4K transcoding — all without subscription fees.",
+    "price_info": "$369.99",
+    "display_price": "$369.99",
+    "store": "Amazon",
+    "image_url": "https://www.bhphotovideo.com/images/fb/terramaster_f6_424_max_6_bay_high_1855838.jpg",
+    "affiliate_url": "https://amzn.to/4hQjR1d",
+    "tags": ["nas", "server", "storage", "terramaster", "network", "pc", "cloud"],
+    "category": "computers",
+    "created_at": "2025-11-11T19:45:00-05:00",
+    "publish_at": "2025-11-11T19:45:00-05:00",
+    "expires_at": "2026-01-10T19:45:00-05:00",
+    "slug": "terramaster-f4-425-nas"
+  },
+  {
     "title": "Amazon Fire TV Cube (Newest Model) — 4K Ultra HD, Hands-Free Alexa",
     "description": "Ultra-fast 4K streaming with an octa-core processor and hands-free Alexa—control your TV, soundbar, and smart home by voice. 2x as powerful as Fire TV Stick 4K Max.",
     "price_info": "$99.99 (list $139.99)",
