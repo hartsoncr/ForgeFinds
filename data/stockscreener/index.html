@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>ForgeFinds Active Screener</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px; max-width: 900px; margin: 0 auto; display: none; background-color: #f9f9f9; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .controls { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; gap: 10px; align-items: center; }
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #0056b3; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #333; color: white; text-transform: uppercase; font-size: 0.85em; }
+        tr:hover { background-color: #f1f1f1; }
+        .green { color: #28a745; font-weight: bold; }
+        .news-link { text-decoration: none; color: #007bff; font-size: 0.9em; }
+        .news-link:hover { text-decoration: underline; }
+        #status { font-weight: bold; margin-top: 10px; color: #555; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>ForgeFinds Market Scanner</h1>
+    </div>
+    
+    <div class="controls">
+        <button onclick="runScreener(1000000)">Run Scanner (High Vol)</button>
+        <span id="status">Ready to scan.</span>
+    </div>
+
+    <table id="resultsTable">
+        <thead>
+            <tr>
+                <th>Ticker</th>
+                <th>Price</th>
+                <th>% Change</th>
+                <th>Volume</th>
+                <th>Mkt Cap</th>
+                <th>News</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        // --- CONFIGURATION ---
+        const API_KEY = 'AGExhhRXUX42m0LJQIJyujnlgDPCyirD'; 
+        const SITE_PASSWORD = 'bang'; 
+        // ---------------------
+
+        // Security Gate
+        const userPass = prompt("Enter Access Code:");
+        if (userPass === SITE_PASSWORD) {
+            document.body.style.display = 'block';
+            // Auto-run on load if desired, otherwise user clicks button
+            // runScreener(1000000); 
+        } else {
+            document.body.innerHTML = '<h1 style="text-align:center; margin-top:50px;">Access Denied</h1>';
+            document.body.style.display = 'block';
+        }
+
+        async function runScreener(minVolume) {
+            const status = document.getElementById('status');
+            const tbody = document.querySelector('#resultsTable tbody');
+            
+            status.textContent = `Scanning for stocks (Vol > ${(minVolume/1000).toFixed(0)}k)...`;
+            tbody.innerHTML = ''; // Clear previous
+
+            try {
+                // Criteria: Price $2-$20, Vol > X
+                const url = `https://financialmodelingprep.com/api/v3/stock-screener?volumeMoreThan=${minVolume}&priceLowerThan=20&priceMoreThan=2&limit=100&apikey=${API_KEY}`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data["Error Message"]) {
+                    status.textContent = "API Error. Check Quota.";
+                    return;
+                }
+
+                // Filter: Up 1% or higher
+                let filtered = data.filter(stock => stock.changesPercentage >= 1);
+
+                // Sort: Highest % Change first
+                filtered.sort((a, b) => b.changesPercentage - a.changesPercentage);
+
+                // Widen Parameters Logic: If less than 10 results, retry with lower volume
+                if (filtered.length < 10 && minVolume > 100000) {
+                    console.log(`Only found ${filtered.length}, widening parameters...`);
+                    runScreener(minVolume / 2); // Recursively call with half the volume req
+                    return;
+                }
+
+                // Slice to top 10
+                const finalResults = filtered.slice(0, 10);
+                status.textContent = `Found ${finalResults.length} stocks fitting criteria.`;
+
+                finalResults.forEach(stock => {
+                    const mktCapB = (stock.marketCap / 1000000000).toFixed(2);
+                    const row = `<tr>
+                        <td><b><a href="https://finance.yahoo.com/quote/${stock.symbol}" target="_blank">${stock.symbol}</a></b></td>
+                        <td>$${stock.price}</td>
+                        <td class="green">+${stock.changesPercentage}%</td>
+                        <td>${parseInt(stock.volume).toLocaleString()}</td>
+                        <td>$${mktCapB}B</td>
+                        <td><a href="https://finance.yahoo.com/quote/${stock.symbol}/news" target="_blank" class="news-link">Check News</a></td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+
+            } catch (error) {
+                console.error(error);
+                status.textContent = "Error connecting to API.";
+            }
+        }
+    </script>
+</body>
+</html>
