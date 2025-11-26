@@ -18,7 +18,8 @@
         .green { color: #28a745; font-weight: bold; }
         .news-link { text-decoration: none; color: #007bff; font-size: 0.9em; }
         .news-link:hover { text-decoration: underline; }
-        #status { font-weight: bold; margin-top: 10px; color: #555; }
+        #status { font-weight: bold; margin-top: 10px; color: #555; font-size: 0.9em; }
+        .warning { color: #d9534f; font-size: 0.8em; margin-top: 5px;}
     </style>
 </head>
 <body>
@@ -29,7 +30,10 @@
     
     <div class="controls">
         <button onclick="runScreener()">Scan Top Gainers</button>
-        <span id="status">Ready to scan.</span>
+        <div>
+            <div id="status">Ready to scan.</div>
+            <div class="warning">Limit: 25 scans per day.</div>
+        </div>
     </div>
 
     <table id="resultsTable">
@@ -47,7 +51,7 @@
 
     <script>
         // --- CONFIGURATION ---
-        const API_KEY = 'AGExhhRXUX42m0LJQIJyujnlgDPCyirD'; 
+        const API_KEY = '1SB71KH1HDJVZ3WM'; 
         const SITE_PASSWORD = 'bang'; 
         // ---------------------
 
@@ -55,7 +59,6 @@
         const userPass = prompt("Enter Access Code:");
         if (userPass === SITE_PASSWORD) {
             document.body.style.display = 'block';
-            runScreener(); // Auto-run on load
         } else {
             document.body.innerHTML = '<h1 style="text-align:center; margin-top:50px;">Access Denied</h1>';
             document.body.style.display = 'block';
@@ -69,46 +72,45 @@
             tbody.innerHTML = ''; 
 
             try {
-                // STRATEGY: Get "Top Gainers" list (free) and filter it ourselves
-                const url = `https://financialmodelingprep.com/api/v3/stock_market/gainers?apikey=${API_KEY}`;
+                // Alpha Vantage Top Gainers Endpoint
+                const url = `https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=${API_KEY}`;
                 
                 const response = await fetch(url);
                 const data = await response.json();
 
+                // Check for API Errors or Limit Reached
+                if (data["Information"]) {
+                    status.textContent = "Limit Reached (25/day). Try again tomorrow.";
+                    return;
+                }
                 if (data["Error Message"]) {
-                    status.textContent = "API Error: " + data["Error Message"];
+                    status.textContent = "Error: Invalid Key or System Error.";
                     return;
                 }
 
-                // Filter the list: Price $2 - $20 ONLY
-                let filtered = data.filter(stock => 
-                    stock.price >= 2 && 
-                    stock.price <= 20
-                );
+                // Alpha Vantage returns { "top_gainers": [...] }
+                const gainers = data.top_gainers || [];
 
-                // Sort: Highest % Change first (API usually does this, but we ensure it)
-                filtered.sort((a, b) => b.changesPercentage - a.changesPercentage);
+                // Filter: Price $2 - $20
+                let filtered = gainers.filter(stock => {
+                    const price = parseFloat(stock.price);
+                    return price >= 2 && price <= 20;
+                });
 
-                // Slice to top 10
-                const finalResults = filtered.slice(0, 10);
-                
-                if (finalResults.length === 0) {
-                    status.textContent = "No stocks found between $2 - $20 in Top Gainers list.";
+                if (filtered.length === 0) {
+                    status.textContent = "No gainers found between $2 - $20.";
                     return;
                 }
 
-                status.textContent = `Found ${finalResults.length} movers ($2-$20).`;
+                status.textContent = `Found ${filtered.length} movers ($2-$20).`;
 
-                finalResults.forEach(stock => {
-                    // Note: Gainers endpoint might not send volume in all cases, handling gracefully
-                    let volDisplay = stock.volume ? parseInt(stock.volume).toLocaleString() : "N/A";
-                    
+                filtered.forEach(stock => {
                     const row = `<tr>
-                        <td><b><a href="https://finance.yahoo.com/quote/${stock.symbol}" target="_blank">${stock.symbol}</a></b></td>
+                        <td><b><a href="https://finance.yahoo.com/quote/${stock.ticker}" target="_blank">${stock.ticker}</a></b></td>
                         <td>$${stock.price}</td>
-                        <td class="green">+${stock.changesPercentage}%</td>
-                        <td>${volDisplay}</td>
-                        <td><a href="https://finance.yahoo.com/quote/${stock.symbol}/news" target="_blank" class="news-link">News</a></td>
+                        <td class="green">+${stock.change_percentage}</td>
+                        <td>${parseInt(stock.volume).toLocaleString()}</td>
+                        <td><a href="https://finance.yahoo.com/quote/${stock.ticker}/news" target="_blank" class="news-link">News</a></td>
                     </tr>`;
                     tbody.innerHTML += row;
                 });
