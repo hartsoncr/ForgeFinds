@@ -8,7 +8,7 @@
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px; max-width: 900px; margin: 0 auto; display: none; background-color: #f9f9f9; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .controls { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; gap: 10px; align-items: center; }
+        .controls { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; gap: 10px; align-items: center; flex-wrap: wrap;}
         button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         button:hover { background-color: #0056b3; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
@@ -28,7 +28,7 @@
     </div>
     
     <div class="controls">
-        <button onclick="runScreener(1000000)">Run Scanner (High Vol)</button>
+        <button onclick="runScreener()">Scan Top Gainers</button>
         <span id="status">Ready to scan.</span>
     </div>
 
@@ -39,8 +39,7 @@
                 <th>Price</th>
                 <th>% Change</th>
                 <th>Volume</th>
-                <th>Mkt Cap</th>
-                <th>News</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody></tbody>
@@ -56,58 +55,60 @@
         const userPass = prompt("Enter Access Code:");
         if (userPass === SITE_PASSWORD) {
             document.body.style.display = 'block';
-            // Auto-run on load if desired, otherwise user clicks button
-            // runScreener(1000000); 
+            runScreener(); // Auto-run on load
         } else {
             document.body.innerHTML = '<h1 style="text-align:center; margin-top:50px;">Access Denied</h1>';
             document.body.style.display = 'block';
         }
 
-        async function runScreener(minVolume) {
+        async function runScreener() {
             const status = document.getElementById('status');
             const tbody = document.querySelector('#resultsTable tbody');
             
-            status.textContent = `Scanning for stocks (Vol > ${(minVolume/1000).toFixed(0)}k)...`;
-            tbody.innerHTML = ''; // Clear previous
+            status.textContent = "Fetching Top Gainers...";
+            tbody.innerHTML = ''; 
 
             try {
-                // Criteria: Price $2-$20, Vol > X
-                const url = `https://financialmodelingprep.com/api/v3/stock-screener?volumeMoreThan=${minVolume}&priceLowerThan=20&priceMoreThan=2&limit=100&apikey=${API_KEY}`;
+                // STRATEGY: Get "Top Gainers" list (free) and filter it ourselves
+                const url = `https://financialmodelingprep.com/api/v3/stock_market/gainers?apikey=${API_KEY}`;
                 
                 const response = await fetch(url);
                 const data = await response.json();
 
                 if (data["Error Message"]) {
-                    status.textContent = "API Error. Check Quota.";
+                    status.textContent = "API Error: " + data["Error Message"];
                     return;
                 }
 
-                // Filter: Up 1% or higher
-                let filtered = data.filter(stock => stock.changesPercentage >= 1);
+                // Filter the list: Price $2 - $20 ONLY
+                let filtered = data.filter(stock => 
+                    stock.price >= 2 && 
+                    stock.price <= 20
+                );
 
-                // Sort: Highest % Change first
+                // Sort: Highest % Change first (API usually does this, but we ensure it)
                 filtered.sort((a, b) => b.changesPercentage - a.changesPercentage);
-
-                // Widen Parameters Logic: If less than 10 results, retry with lower volume
-                if (filtered.length < 10 && minVolume > 100000) {
-                    console.log(`Only found ${filtered.length}, widening parameters...`);
-                    runScreener(minVolume / 2); // Recursively call with half the volume req
-                    return;
-                }
 
                 // Slice to top 10
                 const finalResults = filtered.slice(0, 10);
-                status.textContent = `Found ${finalResults.length} stocks fitting criteria.`;
+                
+                if (finalResults.length === 0) {
+                    status.textContent = "No stocks found between $2 - $20 in Top Gainers list.";
+                    return;
+                }
+
+                status.textContent = `Found ${finalResults.length} movers ($2-$20).`;
 
                 finalResults.forEach(stock => {
-                    const mktCapB = (stock.marketCap / 1000000000).toFixed(2);
+                    // Note: Gainers endpoint might not send volume in all cases, handling gracefully
+                    let volDisplay = stock.volume ? parseInt(stock.volume).toLocaleString() : "N/A";
+                    
                     const row = `<tr>
                         <td><b><a href="https://finance.yahoo.com/quote/${stock.symbol}" target="_blank">${stock.symbol}</a></b></td>
                         <td>$${stock.price}</td>
                         <td class="green">+${stock.changesPercentage}%</td>
-                        <td>${parseInt(stock.volume).toLocaleString()}</td>
-                        <td>$${mktCapB}B</td>
-                        <td><a href="https://finance.yahoo.com/quote/${stock.symbol}/news" target="_blank" class="news-link">Check News</a></td>
+                        <td>${volDisplay}</td>
+                        <td><a href="https://finance.yahoo.com/quote/${stock.symbol}/news" target="_blank" class="news-link">News</a></td>
                     </tr>`;
                     tbody.innerHTML += row;
                 });
