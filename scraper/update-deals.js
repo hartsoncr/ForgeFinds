@@ -14,11 +14,18 @@
 
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
 const { scrapeAllDeals } = require('./amazon-deals');
 
 const DEALS_FILE = path.join(__dirname, '../data/deals.json');
+const IMAGES_DIR = path.join(__dirname, '../images');
 const MAX_DEALS = 300; // Keep latest 300 deals max
 const DEAL_RETENTION_DAYS = 90; // Remove deals older than 90 days
+
+// Ensure images directory exists
+if (!fs.existsSync(IMAGES_DIR)) {
+  fs.mkdirSync(IMAGES_DIR, { recursive: true });
+}
 
 /**
  * Load existing deals from deals.json
@@ -61,6 +68,75 @@ function removeExpiredDeals(deals) {
 }
 
 /**
+ * Download image from URL to local images directory
+ */
+async function downloadImage(url, slug) {
+  return new Promise((resolve, reject) => {
+    const filename = `product-${slug}.jpg`;
+    const filepath = path.join(IMAGES_DIR, filename);
+    
+    // Skip if already exists
+    if (fs.existsSync(filepath)) {
+      console.log(`  ⊙ Image exists: ${filename}`);
+      resolve(`/images/${filename}`);
+      return;
+    }
+    
+    console.log(`  ↓ Downloading: ${filename}...`);
+    
+    https.get(url, (res) => {
+      // Handle redirects
+      if (res.statusCode === 301 || res.statusCode === 302) {
+        https.get(res.headers.location, (res2) => {
+          const stream = fs.createWriteStream(filepath);
+          res2.pipe(stream);
+          stream.on('finish', () => {
+            stream.close();
+            console.log(`  ✓ Saved: ${filename}`);
+            resolve(`/images/${filename}`);
+          });
+        }).on('error', err => {
+          console.error(`  ✗ Failed: ${filename} - ${err.message}`);
+          resolve(url); // Fallback to original URL
+        });
+        return;
+      }
+      
+      const stream = fs.createWriteStream(filepath);
+      res.pipe(stream);
+      stream.on('finish', () => {
+        stream.close();
+        console.log(`  ✓ Saved: ${filename}`);
+        resolve(`/images/${filename}`);
+      });
+    }).on('error', err => {
+      console.error(`  ✗ Failed: ${filename} - ${err.message}`);
+      resolve(url); // Fallback to original URL
+    });
+  });
+}
+
+/**
+ * Download images for new deals
+ */
+async function downloadImagesForDeals(deals) {
+  console.log('[IMAGES] Downloading product images...');
+  
+  for (const deal of deals) {
+    // Only download if it's an external URL (not already local)
+    if (deal.image_url && 
+        !deal.image_url.startsWith('/images/') && 
+        !deal.image_url.startsWith('/')) {
+      deal.image_url = await downloadImage(deal.image_url, deal.slug);
+    } else if (deal.image_url && deal.image_url.startsWith('/images/')) {
+      console.log(`  ⊙ Using local: ${deal.image_url}`);
+    }
+  }
+  
+  return deals;
+}
+
+/**
  * Merge new deals with existing, avoiding duplicates
  * Prioritize by slug (ASIN) and store to detect duplicates
  */
@@ -81,13 +157,14 @@ function mergeDeals(existingDeals, newDeals) {
     const key = `${newDeal.slug}||${newDeal.store}`;
 
     if (existingMap.has(key)) {
-      // Update existing deal with new info (keep older publish_at though)
+      // Update existing deal with new info (keep older publish_at and local image)
       const existing = existingMap.get(key);
       existingMap.set(key, {
         ...existing,
         ...newDeal,
         publish_at: existing.publish_at, // Keep original publish date
         created_at: existing.created_at,
+        image_url: existing.image_url.startsWith('/images/') ? existing.image_url : newDeal.image_url, // Prefer local images
       });
       updateCount++;
     } else {
@@ -176,10 +253,16 @@ async function updateDeals() {
 
     // Step 3: Scrape new deals
     console.log('[STEP 3] Scraping Amazon for new deals...');
-    const newDeals = await scrapeAllDeals();
+    let newDeals = await scrapeAllDeals();
 
     if (newDeals.length === 0) {
       console.warn('[WARN] No new deals scraped! Keeping existing deals.');
+    }
+
+    // Step 3.5: Download images for new deals
+    if (newDeals.length > 0) {
+      console.log('[STEP 3.5] Downloading images for new deals...');
+      newDeals = await downloadImagesForDeals(newDeals);
     }
 
     // Step 4: Merge

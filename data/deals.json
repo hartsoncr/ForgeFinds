@@ -5,7 +5,7 @@
     "price_info": "$1,299.99 (was $1,599.99)",
     "display_price": "$1,299.99",
     "store": "Amazon",
-    "image_url": "/images/laptop.jpg",
+    "image_url": "/images/product-B09FC2QLVB.jpg",
     "affiliate_url": "https://amazon.com/dp/B09FC2QLVB?tag=forgefinds20-20",
     "tags": [
       "gaming",
@@ -19,7 +19,7 @@
     "slug": "B09FC2QLVB",
     "coupon": "Clip $50 coupon at checkout",
     "publish_at": "2026-01-17T02:08:59.524Z",
-    "expires_at": "2026-03-18T02:09:02.333Z",
+    "expires_at": "2026-03-18T02:56:06.467Z",
     "created_at": "2026-01-17T02:08:59.524Z",
     "__price": 1299.99,
     "__pctOff": 19
@@ -30,7 +30,7 @@
     "price_info": "$699.99 (was $899.99)",
     "display_price": "$699.99",
     "store": "Amazon",
-    "image_url": "/images/monitor.jpg",
+    "image_url": "/images/product-B088Z2LHBQ.jpg",
     "affiliate_url": "https://amazon.com/dp/B088Z2LHBQ?tag=forgefinds20-20",
     "tags": [
       "monitor",
@@ -42,7 +42,7 @@
     "category": "computers",
     "slug": "B088Z2LHBQ",
     "publish_at": "2026-01-17T02:08:59.524Z",
-    "expires_at": "2026-03-18T02:09:02.333Z",
+    "expires_at": "2026-03-18T02:56:06.467Z",
     "created_at": "2026-01-17T02:08:59.524Z",
     "__price": 699.99,
     "__pctOff": 22
@@ -53,7 +53,7 @@
     "price_info": "$349.99 (was $399.99)",
     "display_price": "$349.99",
     "store": "Amazon",
-    "image_url": "/images/headphones.jpg",
+    "image_url": "/images/product-B0BQBTX75S.jpg",
     "affiliate_url": "https://amazon.com/dp/B0BQBTX75S?tag=forgefinds20-20",
     "tags": [
       "headphones",
@@ -65,7 +65,7 @@
     "slug": "B0BQBTX75S",
     "coupon": "15% off with code SONY15",
     "publish_at": "2026-01-17T02:08:59.524Z",
-    "expires_at": "2026-03-18T02:09:02.333Z",
+    "expires_at": "2026-03-18T02:56:06.467Z",
     "created_at": "2026-01-17T02:08:59.524Z",
     "__price": 297.49,
     "__pctOff": 15
@@ -76,7 +76,7 @@
     "price_info": "$1,199.99 (was $1,799.99)",
     "display_price": "$1,199.99",
     "store": "Amazon",
-    "image_url": "/images/tv.jpg",
+    "image_url": "/images/product-B0BL8LDVVN.jpg",
     "affiliate_url": "https://amazon.com/dp/B0BL8LDVVN?tag=forgefinds20-20",
     "tags": [
       "tv",
@@ -88,7 +88,7 @@
     "category": "home-theater",
     "slug": "B0BL8LDVVN",
     "publish_at": "2026-01-17T02:08:59.524Z",
-    "expires_at": "2026-03-18T02:09:02.333Z",
+    "expires_at": "2026-03-18T02:56:06.467Z",
     "created_at": "2026-01-17T02:08:59.524Z",
     "__price": 1199.99,
     "__pctOff": 33
@@ -99,7 +99,7 @@
     "price_info": "$129.99 (was $149.99)",
     "display_price": "$129.99",
     "store": "Amazon",
-    "image_url": "/images/mouse.jpg",
+    "image_url": "/images/product-B0BLQXLVDH.jpg",
     "affiliate_url": "https://amazon.com/dp/B0BLQXLVDH?tag=forgefinds20-20",
     "tags": [
       "mouse",
@@ -110,7 +110,7 @@
     "category": "gaming",
     "slug": "B0BLQXLVDH",
     "publish_at": "2026-01-17T02:08:59.524Z",
-    "expires_at": "2026-03-18T02:09:02.333Z",
+    "expires_at": "2026-03-18T02:56:06.467Z",
     "created_at": "2026-01-17T02:08:59.524Z",
     "__price": 129.99,
     "__pctOff": 13
@@ -121,7 +121,7 @@
     "price_info": "$599.99",
     "display_price": "$599.99",
     "store": "Amazon",
-    "image_url": "/images/nas.jpg",
+    "image_url": "/images/product-B0BVR7RS1H.jpg",
     "affiliate_url": "https://amazon.com/dp/B0BVR7RS1H?tag=forgefinds20-20",
     "tags": [
       "nas",
@@ -132,7 +132,7 @@
     "category": "computers",
     "slug": "B0BVR7RS1H",
     "publish_at": "2026-01-17T02:08:59.524Z",
-    "expires_at": "2026-03-18T02:09:02.333Z",
+    "expires_at": "2026-03-18T02:56:06.467Z",
     "created_at": "2026-01-17T02:08:59.524Z",
     "__price": 599.99,
     "__pctOff": null
@@ -143,7 +143,7 @@
     "price_info": "$169.99 (was $249.00)",
     "display_price": "$169.99",
     "store": "Amazon",
-    "image_url": "/images/airpods.jpg",
+    "image_url": "/images/product-B0BDHWDR12.jpg",
     "affiliate_url": "https://amazon.com/dp/B0BDHWDR12?tag=forgefinds20-20",
     "tags": [
       "airpods",
@@ -154,7 +154,7 @@
     "category": "gadgets",
     "slug": "B0BDHWDR12",
     "publish_at": "2026-01-17T02:08:59.524Z",
-    "expires_at": "2026-03-18T02:09:02.333Z",
+    "expires_at": "2026-03-18T02:56:06.467Z",
     "created_at": "2026-01-17T02:08:59.524Z",
     "__price": 169.99,
     "__pctOff": 32
@@ -165,7 +165,7 @@
     "price_info": "$229.99 (was $249.99)",
     "display_price": "$229.99",
     "store": "Amazon",
-    "image_url": "/images/keyboard.jpg",
+    "image_url": "/images/product-B0BQBTX1CY.jpg",
     "affiliate_url": "https://amazon.com/dp/B0BQBTX1CY?tag=forgefinds20-20",
     "tags": [
       "keyboard",
@@ -176,7 +176,7 @@
     "category": "gaming",
     "slug": "B0BQBTX1CY",
     "publish_at": "2026-01-17T02:08:59.524Z",
-    "expires_at": "2026-03-18T02:09:02.333Z",
+    "expires_at": "2026-03-18T02:56:06.467Z",
     "created_at": "2026-01-17T02:08:59.524Z",
     "__price": 229.99,
     "__pctOff": 8
