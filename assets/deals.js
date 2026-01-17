@@ -131,7 +131,7 @@
             <span class="price">${escapeHTML(d.display_price || d.price_info)}</span>
             ${offBadge} ${coupon}
           </div>
-          <a class="cta" href="${d.affiliate_url}" target="_blank">Shop ${escapeHTML(d.store || "Now")}</a>
+          <a class="cta" href="${d.affiliate_url}" target="_blank" rel="nofollow noopener">Shop ${escapeHTML(d.store || "Now")}</a>
         </div>
       </article>`;
     }
