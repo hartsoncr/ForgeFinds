@@ -114,12 +114,13 @@
       const coupon = d.coupon ? `<span class="badge coupon">${escapeHTML(d.coupon)}</span>` : "";
       
       // Schema.org structured data for SEO (JSON-LD)
+      const priceStr = String(d.__price || d.display_price || d.price_info || "0");
       const schemaData = {
         "@context": "https://schema.org",
         "@type": "Offer",
         "name": d.title,
         "description": d.description,
-        "price": (d.__price || d.display_price || d.price_info || "0").replace(/[^\d.]/g, '') || "0",
+        "price": priceStr.replace(/[^\d.]/g, '') || "0",
         "priceCurrency": "USD",
         "url": d.affiliate_url,
         "availability": "https://schema.org/InStock",
@@ -166,27 +167,27 @@
       /* Control Styles */
       .ff-controls{margin-bottom:30px;display:flex;flex-direction:column;gap:16px}
       .ff-search{background:var(--card);border:1px solid var(--line);color:white;padding:12px 16px;border-radius:10px;font-size:1rem;width:100%;transition:all 0.2s ease}
-      .ff-search:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,212,255,0.1);background:var(--bg2)}
+      .ff-search:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(167,139,250,0.1);background:var(--bg2)}
       .ff-filters{display:flex;gap:10px;flex-wrap:wrap}
       .ff-btn{background:var(--card);border:1px solid var(--line);color:var(--muted);padding:8px 16px;border-radius:20px;cursor:pointer;transition:all 0.3s ease;font-weight:500;font-size:0.95rem}
-      .ff-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,0.05)}
-      .ff-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0a0e27;border:none;font-weight:600;box-shadow:0 4px 15px rgba(0,212,255,0.3)}
+      .ff-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(167,139,250,0.05)}
+      .ff-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0a0a14;border:none;font-weight:600;box-shadow:0 4px 15px rgba(167,139,250,0.4)}
 
-      .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px}
-      .deal-card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;transition:all 0.3s ease;position:relative}
-      .deal-card:hover{border-color:var(--accent);box-shadow:0 12px 40px rgba(0,212,255,0.15);transform:translateY(-4px)}
-      .deal-card .imgwrap{background:linear-gradient(135deg,var(--bg2) 0%,var(--bg) 100%);height:240px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
-      .deal-card img{width:100%;height:100%;object-fit:cover;transition:transform 0.4s ease}
-      .deal-card:hover img{transform:scale(1.05)}
-      .deal-card .content{padding:16px;display:flex;flex-direction:column;flex:1}
-      .deal-card .title{font-size:1.1rem;line-height:1.3;margin:0 0 8px;font-weight:600;color:var(--text)}
-      .deal-card .desc{color:var(--muted);font-size:0.9rem;margin:0 0 12px;flex:1}
-      .deal-card .meta{display:flex;align-items:center;gap:8px;margin:0 0 12px;flex-wrap:wrap}
-      .price{background:linear-gradient(135deg,rgba(16,185,129,0.2) 0%,rgba(6,78,59,0.2) 100%);color:#10b981;padding:6px 12px;border-radius:8px;font-weight:700;border:1px solid rgba(16,185,129,0.3);font-size:0.95rem}
-      .badge.off{background:rgba(147,51,234,0.2);color:#a78bfa;padding:6px 12px;border-radius:8px;font-weight:700;border:1px solid rgba(147,51,234,0.3);font-size:0.85rem}
-      .badge.coupon{background:var(--couponbg);color:var(--couponfg);padding:6px 12px;border-radius:8px;font-size:0.85rem;font-weight:600;border:1px solid rgba(96,165,250,0.3)}
-      .cta{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0a0e27;font-weight:700;border-radius:10px;padding:10px 16px;text-align:center;text-decoration:none;transition:all 0.3s ease;border:none;cursor:pointer;width:100%;text-transform:uppercase;font-size:0.9rem;letter-spacing:0.5px}
-      .cta:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,212,255,0.3)}
+      .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:28px}
+      .deal-card{background:rgba(26,23,40,0.6);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);position:relative;backdrop-filter:blur(10px)}
+      .deal-card:hover{border-color:var(--accent);box-shadow:0 16px 48px rgba(167,139,250,0.2);transform:translateY(-6px)}
+      .deal-card .imgwrap{background:linear-gradient(135deg,var(--bg2) 0%,var(--bg) 100%);height:260px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+      .deal-card img{width:100%;height:100%;object-fit:cover;transition:transform 0.4s cubic-bezier(0.4,0,0.2,1)}
+      .deal-card:hover img{transform:scale(1.08)}
+      .deal-card .content{padding:20px;display:flex;flex-direction:column;flex:1}
+      .deal-card .title{font-size:1.1rem;line-height:1.3;margin:0 0 8px;font-weight:700;color:var(--text)}
+      .deal-card .desc{color:var(--muted);font-size:0.9rem;margin:0 0 12px;flex:1;line-height:1.4}
+      .deal-card .meta{display:flex;align-items:center;gap:8px;margin:0 0 16px;flex-wrap:wrap}
+      .price{background:linear-gradient(135deg,rgba(16,185,129,0.25) 0%,rgba(6,78,59,0.25) 100%);color:#10b981;padding:6px 12px;border-radius:8px;font-weight:700;border:1px solid rgba(16,185,129,0.4);font-size:0.95rem}
+      .badge.off{background:linear-gradient(135deg,rgba(167,139,250,0.25) 0%,rgba(147,51,234,0.15) 100%);color:#c4b5fd;padding:6px 12px;border-radius:8px;font-weight:700;border:1px solid rgba(167,139,250,0.3);font-size:0.85rem}
+      .badge.coupon{background:linear-gradient(135deg,rgba(6,182,212,0.2) 0%,rgba(96,165,250,0.15) 100%);color:#a5f3fc;padding:6px 12px;border-radius:8px;font-size:0.85rem;font-weight:600;border:1px solid rgba(96,165,250,0.4)}
+      .cta{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0a0a14;font-weight:700;border-radius:10px;padding:10px 16px;text-align:center;text-decoration:none;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);border:none;cursor:pointer;width:100%;text-transform:uppercase;font-size:0.9rem;letter-spacing:0.5px}
+      .cta:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(167,139,250,0.4)}
       .empty{color:var(--muted);text-align:center;padding:40px 20px;font-size:1.1rem}
       @media(min-width:600px){.ff-controls{flex-direction:row;justify-content:space-between;align-items:center;gap:16px}.ff-search{width:250px}}
       `;
