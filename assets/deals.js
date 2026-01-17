@@ -192,21 +192,19 @@
       
       /* Control Styles */
       .ff-controls{margin-bottom:30px;display:flex;flex-direction:column;gap:16px}
-      .ff-search{background:var(--card);border:1px solid var(--line);color:var(--text);padding:12px 16px;border-radius:6px;font-size:0.95rem;width:100%;transition:all 0.2s ease;box-shadow:0 1px 2px rgba(0,0,0,0.05)}
+      .ff-search{background:var(--card);border:1px solid var(--line);color:var(--text);padding:12px 16px;border-radius:6px;font-size:0.95rem;width:100%;box-shadow:0 1px 2px rgba(0,0,0,0.05)}
       .ff-search:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,107,53,0.1)}
       .ff-filters{display:flex;gap:10px;flex-wrap:wrap}
-      .ff-btn{background:var(--bg);border:1px solid var(--line);color:var(--muted);padding:8px 16px;border-radius:6px;cursor:pointer;transition:all 0.2s ease;font-weight:500;font-size:0.95rem}
+      .ff-btn{background:var(--bg);border:1px solid var(--line);color:var(--muted);padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:500;font-size:0.95rem}
       .ff-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(255,107,53,0.05)}
       .ff-btn.active{background:var(--accent);color:white;border:none;font-weight:600;box-shadow:0 2px 8px rgba(255,107,53,0.2)}
 
       .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px}
-      .deal-card{background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden;display:flex;flex-direction:column;transition:all 0.2s ease;position:relative;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
-      .deal-card:hover{border-color:var(--accent);box-shadow:0 8px 24px rgba(255,107,53,0.15);transform:translateY(-2px)}
+      .deal-card{background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden;display:flex;flex-direction:column;position:relative;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
+      .deal-card:hover{border-color:var(--accent);box-shadow:0 8px 24px rgba(255,107,53,0.15)}
       .deal-card .imgwrap{background:#f0f0f0;height:220px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;flex-shrink:0}
-      .deal-card .img-container{width:100%;height:100%;position:relative;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:loading 1.5s infinite}
-      @keyframes loading{0%{background-position:200% 0}100%{background-position:-200% 0}}
-      .deal-card img{width:100%;height:100%;object-fit:contain;padding:8px;display:block;animation:fadeIn 0.3s ease-in}
-      @keyframes fadeIn{from{opacity:0.7}to{opacity:1}}
+      .deal-card .img-container{width:100%;height:100%;position:relative;background:#f0f0f0}
+      .deal-card img{width:100%;height:100%;object-fit:contain;padding:8px;display:block}
       .deal-card img:hover{opacity:0.95}
       .deal-card .content{padding:16px;display:flex;flex-direction:column;flex:1}
       .deal-card .title{font-size:1rem;line-height:1.3;margin:0 0 8px;font-weight:700;color:var(--text)}
@@ -215,9 +213,8 @@
       .price{background:#f0f0f0;color:var(--accent);padding:6px 12px;border-radius:6px;font-weight:700;font-size:0.95rem;white-space:nowrap}
       .badge.off{background:rgba(211,47,47,0.1);color:var(--highlight);padding:6px 12px;border-radius:6px;font-weight:700;font-size:0.85rem;white-space:nowrap}
       .badge.coupon{background:rgba(255,107,53,0.1);color:var(--accent);padding:6px 12px;border-radius:6px;font-size:0.85rem;font-weight:600;white-space:nowrap}
-      .cta{display:inline-block;background:var(--accent);color:white;font-weight:700;border-radius:6px;padding:10px 16px;text-align:center;text-decoration:none;transition:all 0.2s ease;border:none;cursor:pointer;width:100%;text-transform:uppercase;font-size:0.9rem;letter-spacing:0.3px}
+      .cta{display:inline-block;background:var(--accent);color:white;font-weight:700;border-radius:6px;padding:10px 16px;text-align:center;text-decoration:none;border:none;cursor:pointer;width:100%;text-transform:uppercase;font-size:0.9rem;letter-spacing:0.3px}
       .cta:hover{background:var(--accent-dark);box-shadow:0 4px 12px rgba(255,107,53,0.2)}
-      .cta:active{transform:scale(0.98)}
       .empty{color:var(--muted);text-align:center;padding:40px 20px;font-size:1rem}
       @media(min-width:600px){.ff-controls{flex-direction:row;justify-content:space-between;align-items:center;gap:16px}.ff-search{width:250px}}
       `;
