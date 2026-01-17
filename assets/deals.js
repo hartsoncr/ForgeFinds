@@ -135,7 +135,9 @@
       <article class="deal-card ${expired ? "expired" : ""}">
         <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
         <a class="imgwrap" href="${d.affiliate_url}" target="_blank" rel="nofollow noopener">
-          <img loading="lazy" src="${d.image_url}" alt="${escapeHTML(d.title)}">
+          <div class="img-container">
+            <img loading="lazy" src="${d.image_url}" alt="${escapeHTML(d.title)}" width="300" height="220" decoding="async" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22220%22%3E%3Crect fill=%22%23e0e0e0%22 width=%22300%22 height=%22220%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22 font-family=%22sans-serif%22 font-size=%2216%22%3EImage unavailable%3C/text%3E%3C/svg%3E'">
+          </div>
         </a>
         <div class="content">
           <h3 class="title">${escapeHTML(d.title)}</h3>
@@ -157,6 +159,29 @@
         return;
       }
       mount.innerHTML = deals.map(dealCardHTML).join("");
+      
+      // Preload images for better performance
+      setTimeout(() => {
+        const images = mount.querySelectorAll('img');
+        images.forEach(img => {
+          if (img.loading === 'lazy') {
+            // Trigger IntersectionObserver for lazy loaded images
+            const observer = new IntersectionObserver((entries) => {
+              entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                  // Image will load naturally, but we can warm up the connection
+                  const link = document.createElement('link');
+                  link.rel = 'prefetch';
+                  link.href = entry.target.src;
+                  document.head.appendChild(link);
+                  observer.unobserve(entry.target);
+                }
+              });
+            }, { rootMargin: '50px' });
+            observer.observe(img);
+          }
+        });
+      }, 100);
     }
 
     function injectStyles() {
@@ -177,18 +202,22 @@
       .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px}
       .deal-card{background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden;display:flex;flex-direction:column;transition:all 0.2s ease;position:relative;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
       .deal-card:hover{border-color:var(--accent);box-shadow:0 8px 24px rgba(255,107,53,0.15);transform:translateY(-2px)}
-      .deal-card .imgwrap{background:#f0f0f0;height:220px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
-      .deal-card img{width:100%;height:100%;object-fit:cover;transition:transform 0.3s ease}
-      .deal-card:hover img{transform:scale(1.05)}
+      .deal-card .imgwrap{background:#f0f0f0;height:220px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;flex-shrink:0}
+      .deal-card .img-container{width:100%;height:100%;position:relative;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:loading 1.5s infinite}
+      @keyframes loading{0%{background-position:200% 0}100%{background-position:-200% 0}}
+      .deal-card img{width:100%;height:100%;object-fit:contain;padding:8px;display:block;animation:fadeIn 0.3s ease-in}
+      @keyframes fadeIn{from{opacity:0.7}to{opacity:1}}
+      .deal-card img:hover{opacity:0.95}
       .deal-card .content{padding:16px;display:flex;flex-direction:column;flex:1}
       .deal-card .title{font-size:1rem;line-height:1.3;margin:0 0 8px;font-weight:700;color:var(--text)}
-      .deal-card .desc{color:var(--muted);font-size:0.85rem;margin:0 0 12px;flex:1;line-height:1.4}
+      .deal-card .desc{color:var(--muted);font-size:0.85rem;margin:0 0 12px;flex:1;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
       .deal-card .meta{display:flex;align-items:center;gap:8px;margin:0 0 16px;flex-wrap:wrap}
-      .price{background:#f0f0f0;color:var(--accent);padding:6px 12px;border-radius:6px;font-weight:700;font-size:0.95rem}
-      .badge.off{background:rgba(211,47,47,0.1);color:var(--highlight);padding:6px 12px;border-radius:6px;font-weight:700;font-size:0.85rem}
-      .badge.coupon{background:rgba(255,107,53,0.1);color:var(--accent);padding:6px 12px;border-radius:6px;font-size:0.85rem;font-weight:600}
+      .price{background:#f0f0f0;color:var(--accent);padding:6px 12px;border-radius:6px;font-weight:700;font-size:0.95rem;white-space:nowrap}
+      .badge.off{background:rgba(211,47,47,0.1);color:var(--highlight);padding:6px 12px;border-radius:6px;font-weight:700;font-size:0.85rem;white-space:nowrap}
+      .badge.coupon{background:rgba(255,107,53,0.1);color:var(--accent);padding:6px 12px;border-radius:6px;font-size:0.85rem;font-weight:600;white-space:nowrap}
       .cta{display:inline-block;background:var(--accent);color:white;font-weight:700;border-radius:6px;padding:10px 16px;text-align:center;text-decoration:none;transition:all 0.2s ease;border:none;cursor:pointer;width:100%;text-transform:uppercase;font-size:0.9rem;letter-spacing:0.3px}
       .cta:hover{background:var(--accent-dark);box-shadow:0 4px 12px rgba(255,107,53,0.2)}
+      .cta:active{transform:scale(0.98)}
       .empty{color:var(--muted);text-align:center;padding:40px 20px;font-size:1rem}
       @media(min-width:600px){.ff-controls{flex-direction:row;justify-content:space-between;align-items:center;gap:16px}.ff-search{width:250px}}
       `;
