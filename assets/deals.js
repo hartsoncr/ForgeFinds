@@ -11,25 +11,36 @@
     const escapeHTML = (s = "") => s.replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[m]);
 
     async function loadDeals({ includeScheduled = false } = {}) {
-      const res = await fetch(`${basePath()}/data/deals.json?cb=${Date.now()}`);
-      if (!res.ok) throw new Error(`Failed to load: ${res.status}`);
-      let deals = await res.json();
-      const n = now();
+      try {
+        const url = `${basePath()}/data/deals.json?cb=${Date.now()}`;
+        console.log('[FF] Fetching deals from:', url);
+        const res = await fetch(url);
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        let deals = await res.json();
+        console.log('[FF] Loaded', deals.length, 'deals');
+        const n = now();
 
-      // Normalize dates & expiration
-      deals = deals.map(d => {
-        const pub = d.publish_at || d.created_at || toISO(n);
-        const exp = d.expires_at || toISO(addDays(parseISO(pub), 60));
-        return { ...d, publish_at: pub, expires_at: exp };
-      }).filter(d => {
-        const pub = parseISO(d.publish_at);
-        const exp = parseISO(d.expires_at);
-        return includeScheduled ? true : (pub <= n && exp > n);
-      }).sort((a, b) => parseISO(b.publish_at) - parseISO(a.publish_at))
-        .map(deriveNumbers);
+        // Normalize dates & expiration
+        deals = deals.map(d => {
+          const pub = d.publish_at || d.created_at || toISO(n);
+          const exp = d.expires_at || toISO(addDays(parseISO(pub), 60));
+          return { ...d, publish_at: pub, expires_at: exp };
+        }).filter(d => {
+          const pub = parseISO(d.publish_at);
+          const exp = parseISO(d.expires_at);
+          return includeScheduled ? true : (pub <= n && exp > n);
+        }).sort((a, b) => parseISO(b.publish_at) - parseISO(a.publish_at))
+          .map(deriveNumbers);
 
-      allDeals = deals; // Store for search
-      return deals;
+        console.log('[FF] Filtered to', deals.length, 'live deals');
+        allDeals = deals; // Store for search
+        return deals;
+      } catch (err) {
+        console.error('[FF] loadDeals error:', err.message, err.stack);
+        throw err;
+      }
     }
 
     // --- Price Logic ---
@@ -192,15 +203,20 @@
 
   window.ForgeFinds = {
     async renderDeals({ mountSelector = "#deals", includeScheduled = false } = {}) {
+      const mount = document.querySelector(mountSelector);
       try {
+        console.log('[FF] renderDeals starting for', mountSelector);
         FF.injectStyles();
         const list = await FF.loadDeals({ includeScheduled });
+        console.log('[FF] Got list with', list.length, 'deals, rendering controls');
         FF.renderControls(mountSelector); // Inject Search/Filter
         FF.renderCards(list, mountSelector);
+        console.log('[FF] renderDeals complete');
       } catch (err) {
-        console.error(err);
-        const mount = document.querySelector(mountSelector);
-        if (mount) mount.innerHTML = `<p class="empty">We couldn't load deals right now.</p>`;
+        console.error('[FF] renderDeals failed:', err.message);
+        if (mount) {
+          mount.innerHTML = `<p class="empty">❌ Error loading deals: ${err.message}</p>`;
+        }
       }
     }
   };
