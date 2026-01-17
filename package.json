@@ -5,13 +5,21 @@
   "type": "commonjs",
   "scripts": {
     "scrape": "node scraper/update-deals.js && node scraper/generate-sitemap.js",
-    "sitemap": "node scraper/generate-sitemap.js"
+    "sitemap": "node scraper/generate-sitemap.js",
+    "video:one": "node automation/video-agent.js --one"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.12",
-    "node-fetch": "^2.7.0"
+    "dotenv": "^16.4.0",
+    "node-fetch": "^2.7.0",
+    "puppeteer": "^24.35.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
   },
   "engines": {
     "node": "18.x"
+  },
+  "devDependencies": {
+    "open": "^11.0.0"
   }
 }

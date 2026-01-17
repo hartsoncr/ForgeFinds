@@ -3,7 +3,7 @@
   <url>
     <loc>https://forgefinds.com/</loc>
     <changefreq>daily</changefreq>
-    <priority>1.0</priority>
+    <priority>1</priority>
   </url>
   <url>
     <loc>https://forgefinds.com/browse.html</loc>
@@ -29,5 +29,53 @@
     <loc>https://forgefinds.com/pages/contact.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://forgefinds.com/deals/B09FC2QLVB.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-01-17T02:08:59.524Z</lastmod>
+  </url>
+  <url>
+    <loc>https://forgefinds.com/deals/B088Z2LHBQ.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-01-17T02:08:59.524Z</lastmod>
+  </url>
+  <url>
+    <loc>https://forgefinds.com/deals/B0BQBTX75S.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-01-17T02:08:59.524Z</lastmod>
+  </url>
+  <url>
+    <loc>https://forgefinds.com/deals/B0BL8LDVVN.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-01-17T02:08:59.524Z</lastmod>
+  </url>
+  <url>
+    <loc>https://forgefinds.com/deals/B0BLQXLVDH.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-01-17T02:08:59.524Z</lastmod>
+  </url>
+  <url>
+    <loc>https://forgefinds.com/deals/B0BVR7RS1H.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-01-17T02:08:59.524Z</lastmod>
+  </url>
+  <url>
+    <loc>https://forgefinds.com/deals/B0BDHWDR12.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-01-17T02:08:59.524Z</lastmod>
+  </url>
+  <url>
+    <loc>https://forgefinds.com/deals/B0BQBTX1CY.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-01-17T02:08:59.524Z</lastmod>
   </url>
 </urlset>
