@@ -40,7 +40,7 @@
     p.lede{color:var(--muted);margin:0 0 48px;font-size:1.15rem;font-weight:500;letter-spacing:0.3px}
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:28px}
   </style>
-  <script src="/assets/deals.js"></script>
+  <script src="/assets/deals.js" defer></script>
 </head>
 <body>
   <header>
@@ -55,8 +55,21 @@
   </main>
 
   <script>
-    // show live items only
-    ForgeFinds.renderDeals({ mountSelector: "#deals", includeScheduled: false });
+    // show live items only - wait for DOM and defer script
+    function initDeals() {
+      if (typeof ForgeFinds !== 'undefined' && document.querySelector('#deals')) {
+        console.log('[INDEX] DOM ready, calling renderDeals');
+        ForgeFinds.renderDeals({ mountSelector: "#deals", includeScheduled: false });
+      } else {
+        console.log('[INDEX] Waiting for ForgeFinds and DOM...');
+        setTimeout(initDeals, 100);
+      }
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initDeals);
+    } else {
+      initDeals();
+    }
   </script>
 </body>
 </html>
