@@ -1,0 +1,53 @@
+name: Daily Video Upload
+
+on:
+  schedule:
+    # Run daily at 10 AM UTC (adjust timezone as needed)
+    - cron: '0 10 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  upload-video:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Create .env file
+        run: |
+          cat << EOF > .env
+          PEXELS_API_KEY=${{ secrets.PEXELS_API_KEY }}
+          FORGEFINDS_LOGO_PATH=${{ github.workspace }}/forgefinds-logo.png
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL=gpt-4o-mini
+          YT_CLIENT_ID=${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET=${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN=${{ secrets.YT_REFRESH_TOKEN }}
+          YT_CHANNEL_ID=${{ secrets.YT_CHANNEL_ID }}
+          DISABLE_TELEMETRY=true
+          EOF
+
+      - name: Run video agent
+        run: npm run video:one
+
+      - name: Commit updated posted.json
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data/posted.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "chore: mark deal as posted [skip ci]"
+          git push
