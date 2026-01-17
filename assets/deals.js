@@ -15,11 +15,12 @@
         const url = `${basePath()}/data/deals.json?cb=${Date.now()}`;
         console.log('[FF] Fetching deals from:', url);
         const res = await fetch(url);
+        console.log('[FF] Fetch response status:', res.status, 'ok:', res.ok);
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}: ${res.statusText}`);
         }
         let deals = await res.json();
-        console.log('[FF] Loaded', deals.length, 'deals');
+        console.log('[FF] Loaded', deals.length, 'deals from JSON');
         const n = now();
 
         // Normalize dates & expiration
@@ -170,12 +171,12 @@
       .ff-search:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(167,139,250,0.1);background:var(--bg2)}
       .ff-filters{display:flex;gap:10px;flex-wrap:wrap}
       .ff-btn{background:var(--card);border:1px solid var(--line);color:var(--muted);padding:8px 16px;border-radius:20px;cursor:pointer;transition:all 0.3s ease;font-weight:500;font-size:0.95rem}
-      .ff-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(167,139,250,0.05)}
-      .ff-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0a0a14;border:none;font-weight:600;box-shadow:0 4px 15px rgba(167,139,250,0.4)}
+      .ff-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(255,107,53,0.08)}
+      .ff-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent3));color:#0d0510;border:none;font-weight:600;box-shadow:0 4px 20px rgba(255,107,53,0.4)}
 
       .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:28px}
       .deal-card{background:rgba(26,23,40,0.6);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);position:relative;backdrop-filter:blur(10px)}
-      .deal-card:hover{border-color:var(--accent);box-shadow:0 16px 48px rgba(167,139,250,0.2);transform:translateY(-6px)}
+      .deal-card:hover{border-color:var(--accent);box-shadow:0 16px 48px rgba(255,107,53,0.25);transform:translateY(-6px)}
       .deal-card .imgwrap{background:linear-gradient(135deg,var(--bg2) 0%,var(--bg) 100%);height:260px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
       .deal-card img{width:100%;height:100%;object-fit:cover;transition:transform 0.4s cubic-bezier(0.4,0,0.2,1)}
       .deal-card:hover img{transform:scale(1.08)}
@@ -184,10 +185,10 @@
       .deal-card .desc{color:var(--muted);font-size:0.9rem;margin:0 0 12px;flex:1;line-height:1.4}
       .deal-card .meta{display:flex;align-items:center;gap:8px;margin:0 0 16px;flex-wrap:wrap}
       .price{background:linear-gradient(135deg,rgba(16,185,129,0.25) 0%,rgba(6,78,59,0.25) 100%);color:#10b981;padding:6px 12px;border-radius:8px;font-weight:700;border:1px solid rgba(16,185,129,0.4);font-size:0.95rem}
-      .badge.off{background:linear-gradient(135deg,rgba(167,139,250,0.25) 0%,rgba(147,51,234,0.15) 100%);color:#c4b5fd;padding:6px 12px;border-radius:8px;font-weight:700;border:1px solid rgba(167,139,250,0.3);font-size:0.85rem}
-      .badge.coupon{background:linear-gradient(135deg,rgba(6,182,212,0.2) 0%,rgba(96,165,250,0.15) 100%);color:#a5f3fc;padding:6px 12px;border-radius:8px;font-size:0.85rem;font-weight:600;border:1px solid rgba(96,165,250,0.4)}
-      .cta{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0a0a14;font-weight:700;border-radius:10px;padding:10px 16px;text-align:center;text-decoration:none;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);border:none;cursor:pointer;width:100%;text-transform:uppercase;font-size:0.9rem;letter-spacing:0.5px}
-      .cta:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(167,139,250,0.4)}
+      .badge.off{background:linear-gradient(135deg,rgba(217,70,239,0.25) 0%,rgba(217,70,239,0.15) 100%);color:#f0abfc;padding:6px 12px;border-radius:8px;font-weight:700;border:1px solid rgba(217,70,239,0.4);font-size:0.85rem}
+      .badge.coupon{background:linear-gradient(135deg,rgba(255,107,53,0.2) 0%,rgba(59,130,246,0.15) 100%);color:#fca5a5;padding:6px 12px;border-radius:8px;font-size:0.85rem;font-weight:600;border:1px solid rgba(255,107,53,0.4)}
+      .cta{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent3));color:#0d0510;font-weight:700;border-radius:10px;padding:10px 16px;text-align:center;text-decoration:none;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);border:none;cursor:pointer;width:100%;text-transform:uppercase;font-size:0.9rem;letter-spacing:0.5px}
+      .cta:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(255,107,53,0.4)}
       .empty{color:var(--muted);text-align:center;padding:40px 20px;font-size:1.1rem}
       @media(min-width:600px){.ff-controls{flex-direction:row;justify-content:space-between;align-items:center;gap:16px}.ff-search{width:250px}}
       `;
