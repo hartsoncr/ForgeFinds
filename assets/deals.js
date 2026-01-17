@@ -189,7 +189,7 @@
 
     function basePath() { return ""; } 
 
-    return { loadDeals, renderCards, injectStyles, renderControls };
+    return { loadDeals, renderCards, renderFromList: renderCards, injectStyles, renderControls };
   })();
 
   window.ForgeFinds = {
