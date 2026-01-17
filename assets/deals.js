@@ -15,7 +15,6 @@
       if (!res.ok) throw new Error(`Failed to load: ${res.status}`);
       let deals = await res.json();
       const n = now();
-      console.log('[deals.js] Loaded raw deals:', deals.length);
 
       // Normalize dates & expiration
       deals = deals.map(d => {
@@ -25,15 +24,10 @@
       }).filter(d => {
         const pub = parseISO(d.publish_at);
         const exp = parseISO(d.expires_at);
-        const shouldShow = includeScheduled ? true : (pub <= n && exp > n);
-        if (!shouldShow) {
-          console.log('[deals.js] Filtered out:', d.title, 'pub:', pub, 'exp:', exp, 'now:', n);
-        }
-        return shouldShow;
+        return includeScheduled ? true : (pub <= n && exp > n);
       }).sort((a, b) => parseISO(b.publish_at) - parseISO(a.publish_at))
         .map(deriveNumbers);
 
-      console.log('[deals.js] After filtering:', deals.length);
       allDeals = deals; // Store for search
       return deals;
     }
@@ -144,14 +138,12 @@
 
     function renderCards(deals, mountSelector = "#deals") {
       const mount = document.querySelector(mountSelector);
-      console.log('[deals.js] renderCards called with', deals.length, 'deals, mounting to', mountSelector, 'element found:', !!mount);
       if (!mount) return;
       if (!deals.length) {
         mount.innerHTML = `<p class="empty">No deals match your search.</p>`;
         return;
       }
       mount.innerHTML = deals.map(dealCardHTML).join("");
-      console.log('[deals.js] Rendered', deals.length, 'deals');
     }
 
     function injectStyles() {
@@ -195,16 +187,14 @@
   window.ForgeFinds = {
     async renderDeals({ mountSelector = "#deals", includeScheduled = false } = {}) {
       try {
-        console.log('[deals.js] renderDeals called with mountSelector:', mountSelector, 'includeScheduled:', includeScheduled);
         FF.injectStyles();
         const list = await FF.loadDeals({ includeScheduled });
-        console.log('[deals.js] loadDeals returned', list.length, 'deals');
         FF.renderControls(mountSelector); // Inject Search/Filter
         FF.renderCards(list, mountSelector);
       } catch (err) {
-        console.error('[deals.js] ERROR:', err);
+        console.error(err);
         const mount = document.querySelector(mountSelector);
-        if (mount) mount.innerHTML = `<p class="empty">We couldn't load deals right now. Error: ${err.message}</p>`;
+        if (mount) mount.innerHTML = `<p class="empty">We couldn't load deals right now.</p>`;
       }
     }
   };
