@@ -1,0 +1,73 @@
+name: Daily Amazon Deals Scrape
+
+on:
+  # Run daily at 6 AM UTC (adjust time zone as needed)
+  schedule:
+    - cron: '0 6 * * *'
+  
+  # Allow manual trigger from GitHub UI
+  workflow_dispatch:
+
+jobs:
+  scrape-and-update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    permissions:
+      contents: write
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run deal scraper
+        run: npm run scrape
+        env:
+          NODE_OPTIONS: --max-old-space-size=2048
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if git diff --quiet data/deals.json; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Deals file has been updated"
+            git diff --stat data/deals.json || true
+          fi
+
+      - name: Configure Git
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config --local user.email "bot@forgefinds.com"
+          git config --local user.name "ForgeFinds Bot"
+
+      - name: Commit and push updates
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git add data/deals.json
+          git commit -m "chore: automated deal update - $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Report status
+        if: always()
+        run: |
+          echo "✅ Scraper job completed"
+          echo "Timestamp: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+          if [ -f data/deals.json ]; then
+            DEAL_COUNT=$(grep -c '"slug"' data/deals.json || echo "0")
+            echo "Total deals in database: ~$DEAL_COUNT"
+          fi

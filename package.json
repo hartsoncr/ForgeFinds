@@ -1,0 +1,17 @@
+{
+  "name": "forgefinds-scraper",
+  "version": "1.0.0",
+  "description": "Automated Amazon deals scraper for ForgeFinds",
+  "type": "commonjs",
+  "scripts": {
+    "scrape": "node scraper/update-deals.js && node scraper/generate-sitemap.js",
+    "sitemap": "node scraper/generate-sitemap.js"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "node-fetch": "^2.7.0"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}

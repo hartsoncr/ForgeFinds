@@ -102,8 +102,25 @@
       const offBadge = d.__pctOff ? `<span class="badge off">${d.__pctOff}% off</span>` : "";
       const coupon = d.coupon ? `<span class="badge coupon">${escapeHTML(d.coupon)}</span>` : "";
       
+      // Schema.org structured data for SEO (JSON-LD)
+      const schemaData = {
+        "@context": "https://schema.org",
+        "@type": "Offer",
+        "name": d.title,
+        "description": d.description,
+        "price": (d.__price || d.display_price || d.price_info || "0").replace(/[^\d.]/g, '') || "0",
+        "priceCurrency": "USD",
+        "url": d.affiliate_url,
+        "availability": "https://schema.org/InStock",
+        "seller": {
+          "@type": "Organization",
+          "name": d.store || "Amazon"
+        }
+      };
+      
       return `
       <article class="deal-card ${expired ? "expired" : ""}">
+        <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
         <a class="imgwrap" href="${d.affiliate_url}" target="_blank" rel="nofollow noopener">
           <img loading="lazy" src="${d.image_url}" alt="${escapeHTML(d.title)}">
         </a>
