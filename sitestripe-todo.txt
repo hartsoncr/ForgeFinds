@@ -1,0 +1,4 @@
+# Open each link below, copy the SiteStripe short URL, and paste it into deals.json as short_affiliate_url
+
+https://www.amazon.com/dp/B0BDHWDR12?tag=forgefinds20-20
+SiteStripe: https://amzn.to/4jJriYV

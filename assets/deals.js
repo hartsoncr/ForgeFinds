@@ -134,7 +134,7 @@
       return `
       <article class="deal-card ${expired ? "expired" : ""}">
         <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
-        <a class="imgwrap" href="${d.affiliate_url}" target="_blank" rel="nofollow noopener">
+        <a class="imgwrap" href="${d.short_affiliate_url || d.affiliate_url}" target="_blank" rel="nofollow noopener">
           <div class="img-container">
             <img loading="lazy" src="${d.image_url}" alt="${escapeHTML(d.title)}" width="300" height="220" decoding="async" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22220%22%3E%3Crect fill=%22%23e0e0e0%22 width=%22300%22 height=%22220%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22 font-family=%22sans-serif%22 font-size=%2216%22%3EImage unavailable%3C/text%3E%3C/svg%3E'">
           </div>
@@ -146,7 +146,7 @@
             <span class="price">${escapeHTML(d.display_price || d.price_info)}</span>
             ${offBadge} ${coupon}
           </div>
-          <a class="cta" href="${d.affiliate_url}" target="_blank" rel="nofollow noopener">Shop ${escapeHTML(d.store || "Now")}</a>
+          <a class="cta" href="${d.short_affiliate_url || d.affiliate_url}" target="_blank" rel="nofollow noopener">Shop ${escapeHTML(d.store || "Now")}</a>
         </div>
       </article>`;
     }
