@@ -272,9 +272,12 @@ async function getYoutubeAccessToken() {
 
   if (!res.ok) {
     const err = await res.text();
-    const errObj = (() => {
-      try { return JSON.parse(err); } catch { return null; }
-    })();
+    let errObj = null;
+    try {
+      errObj = JSON.parse(err);
+    } catch (e) {
+      // Response was not JSON
+    }
     
     console.error('\n❌ YouTube Authentication Failed\n');
     console.error(`Status: ${res.status}`);

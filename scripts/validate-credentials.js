@@ -204,6 +204,9 @@ function main() {
   }
 
   // Exit with status code indicating if video upload can work
+  // Note: We use exit code 0 (success) even when credentials are missing
+  // because this is a validation tool, not a build/test tool.
+  // Missing credentials are expected in many cases where video upload is optional.
   const videoUploadCreds = CREDENTIAL_GROUPS['Video Upload (Optional)'].credentials;
   const videoCanWork = videoUploadCreds.every(c => checkCredential(c.name).configured);
   

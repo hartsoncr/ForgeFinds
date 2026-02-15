@@ -16,6 +16,7 @@ jobs:
       - name: Check if YouTube credentials are configured
         id: check
         run: |
+          # Check if all required secrets are configured
           if [ -n "${{ secrets.YT_CLIENT_ID }}" ] && \
              [ -n "${{ secrets.YT_CLIENT_SECRET }}" ] && \
              [ -n "${{ secrets.YT_REFRESH_TOKEN }}" ] && \
@@ -29,6 +30,7 @@ jobs:
             echo "⚠️  Missing YouTube or API credentials - video upload will be skipped"
             echo ""
             echo "Required secrets:"
+            # Display status of each required secret (duplicated for clarity)
             echo "  - YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID != '' && '✓' || '✗' }}"
             echo "  - YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET != '' && '✓' || '✗' }}"
             echo "  - YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN != '' && '✓' || '✗' }}"
