@@ -7,7 +7,42 @@ on:
   workflow_dispatch: # Allow manual trigger
 
 jobs:
+  check-credentials:
+    runs-on: ubuntu-latest
+    outputs:
+      has-credentials: ${{ steps.check.outputs.has-credentials }}
+    
+    steps:
+      - name: Check if YouTube credentials are configured
+        id: check
+        run: |
+          if [ -n "${{ secrets.YT_CLIENT_ID }}" ] && \
+             [ -n "${{ secrets.YT_CLIENT_SECRET }}" ] && \
+             [ -n "${{ secrets.YT_REFRESH_TOKEN }}" ] && \
+             [ -n "${{ secrets.YT_CHANNEL_ID }}" ] && \
+             [ -n "${{ secrets.PEXELS_API_KEY }}" ] && \
+             [ -n "${{ secrets.OPENAI_API_KEY }}" ]; then
+            echo "has-credentials=true" >> $GITHUB_OUTPUT
+            echo "✅ All required credentials are configured"
+          else
+            echo "has-credentials=false" >> $GITHUB_OUTPUT
+            echo "⚠️  Missing YouTube or API credentials - video upload will be skipped"
+            echo ""
+            echo "Required secrets:"
+            echo "  - YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID != '' && '✓' || '✗' }}"
+            echo "  - YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET != '' && '✓' || '✗' }}"
+            echo "  - YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN != '' && '✓' || '✗' }}"
+            echo "  - YT_CHANNEL_ID: ${{ secrets.YT_CHANNEL_ID != '' && '✓' || '✗' }}"
+            echo "  - PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY != '' && '✓' || '✗' }}"
+            echo "  - OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY != '' && '✓' || '✗' }}"
+            echo ""
+            echo "💡 Video upload is optional. The site works fine without it."
+            echo "📚 See SETUP.md for credential setup instructions."
+          fi
+
   upload-video:
+    needs: check-credentials
+    if: needs.check-credentials.outputs.has-credentials == 'true'
     runs-on: ubuntu-latest
     
     steps:
@@ -51,3 +86,23 @@ jobs:
           git add data/posted.json
           git diff --quiet && git diff --staged --quiet || git commit -m "chore: mark deal as posted [skip ci]"
           git push
+  
+  skip-notification:
+    needs: check-credentials
+    if: needs.check-credentials.outputs.has-credentials == 'false'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Notify skipped
+        run: |
+          echo "⏭️  Video upload workflow skipped"
+          echo ""
+          echo "Reason: Required YouTube/API credentials are not configured"
+          echo ""
+          echo "This is normal if you haven't set up video uploads yet."
+          echo "The daily deals scraper continues to work independently."
+          echo ""
+          echo "To enable video uploads:"
+          echo "  1. See SETUP.md for detailed setup instructions"
+          echo "  2. Configure the required GitHub Secrets"
+          echo "  3. The workflow will run automatically once configured"

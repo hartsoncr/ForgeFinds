@@ -14,6 +14,132 @@
 
 ---
 
+## 🎥 Optional: Video Upload Setup
+
+**Note:** Video upload to YouTube is completely optional. The site works perfectly without it!
+
+### Prerequisites
+- YouTube channel
+- Google Cloud account (free tier is fine)
+- OpenAI account (pay-as-you-go)
+- Pexels account (free)
+
+### Step-by-Step YouTube OAuth Setup
+
+#### 1. Create Google Cloud Project
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project (e.g., "ForgeFinds Video Upload")
+3. Enable **YouTube Data API v3**:
+   - In the left menu: APIs & Services → Library
+   - Search for "YouTube Data API v3"
+   - Click Enable
+
+#### 2. Configure OAuth Consent Screen
+1. Go to: APIs & Services → OAuth consent screen
+2. Choose "External" user type
+3. Fill in required fields:
+   - App name: ForgeFinds
+   - User support email: your email
+   - Developer contact: your email
+4. Add scope: `https://www.googleapis.com/auth/youtube.upload`
+5. Add yourself as a test user
+6. Save and continue
+
+#### 3. Create OAuth Credentials
+1. Go to: APIs & Services → Credentials
+2. Click "Create Credentials" → "OAuth client ID"
+3. Choose "Desktop app" as application type
+4. Name it "ForgeFinds Desktop"
+5. Click Create
+6. **Save the Client ID and Client Secret** — you'll need these
+
+#### 4. Generate Refresh Token
+```bash
+# Add Client ID and Secret to .env first
+echo "YT_CLIENT_ID=your_client_id_here" >> .env
+echo "YT_CLIENT_SECRET=your_client_secret_here" >> .env
+
+# Run the token generation script
+npm run youtube:refresh-token
+```
+
+Follow the browser prompt to authorize access. Copy the refresh token shown in the terminal.
+
+#### 5. Get Your Channel ID
+1. Go to [YouTube Studio](https://studio.youtube.com)
+2. Settings → Channel → Advanced settings
+3. Copy your Channel ID (starts with `UC...`)
+
+#### 6. Configure All Credentials
+
+**Local setup (.env file):**
+```bash
+# YouTube OAuth
+YT_CLIENT_ID=your_client_id_here
+YT_CLIENT_SECRET=your_client_secret_here
+YT_REFRESH_TOKEN=your_refresh_token_here
+YT_CHANNEL_ID=UCxxxxxxxxxxxxx
+
+# OpenAI (get from platform.openai.com/api-keys)
+OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxx
+OPENAI_MODEL=gpt-4o-mini
+
+# Pexels (get from pexels.com/api)
+PEXELS_API_KEY=xxxxxxxxxxxxxxxx
+
+# Logo path
+FORGEFINDS_LOGO_PATH=./forgefinds-logo.png
+```
+
+**GitHub Actions (Repository Secrets):**
+1. Go to: Repository → Settings → Secrets and variables → Actions
+2. Add each secret individually:
+   - `YT_CLIENT_ID`
+   - `YT_CLIENT_SECRET`
+   - `YT_REFRESH_TOKEN`
+   - `YT_CHANNEL_ID`
+   - `OPENAI_API_KEY`
+   - `PEXELS_API_KEY`
+
+#### 7. Validate Setup
+```bash
+npm run validate
+```
+
+This checks which credentials are configured and provides setup links for missing ones.
+
+### Troubleshooting YouTube Authentication
+
+**Error: `invalid_grant`**
+
+This means your refresh token is expired or invalid. Common causes:
+- Token expired after 6 months of inactivity
+- OAuth consent was revoked
+- Client credentials changed
+
+**Fix:**
+```bash
+npm run youtube:refresh-token
+```
+Then update the `YT_REFRESH_TOKEN` secret in GitHub Actions.
+
+**Error: Missing credentials**
+
+Run the validation script to see what's missing:
+```bash
+npm run validate
+```
+
+**Workflow skipping video upload:**
+
+This is normal if credentials aren't configured. The workflow will:
+- Check for required secrets
+- Skip gracefully if any are missing
+- Display which credentials need to be configured
+- Continue working for daily deals scraping
+
+---
+
 ## 🚀 What Schema.org Does (Simple)
 
 **Schema.org = Invisible labels that tell Google "this is a real product deal"**

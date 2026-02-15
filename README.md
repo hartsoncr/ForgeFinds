@@ -101,6 +101,50 @@ This prevents "suspicious affiliate site" warnings:
 
 ---
 
+## 🔧 Troubleshooting
+
+### Video Upload Issues
+
+**Problem:** Daily video workflow failing with authentication errors
+
+**Symptoms:**
+- Workflow shows: `YouTube token error: 400 invalid_grant`
+- Video upload job fails or gets skipped
+
+**Solutions:**
+
+1. **Check if credentials are configured:**
+   ```bash
+   npm run validate
+   ```
+   This will show which credentials are missing.
+
+2. **Regenerate YouTube refresh token:**
+   ```bash
+   npm run youtube:refresh-token
+   ```
+   Follow the OAuth flow to generate a new token.
+
+3. **Update GitHub Secrets:**
+   - Go to: Repository → Settings → Secrets and variables → Actions
+   - Update `YT_REFRESH_TOKEN` with the new token
+   - Verify all YouTube secrets are set:
+     - `YT_CLIENT_ID`
+     - `YT_CLIENT_SECRET`
+     - `YT_REFRESH_TOKEN`
+     - `YT_CHANNEL_ID`
+     - `PEXELS_API_KEY`
+     - `OPENAI_API_KEY`
+
+4. **Note:** Video upload is **optional**. If you don't configure it:
+   - The workflow skips gracefully (no errors)
+   - Daily deals scraper continues working
+   - The site functions perfectly without videos
+
+For detailed setup instructions, see **[SETUP.md](SETUP.md)**.
+
+---
+
 ## 🚀 Deploy
 
 **Option 1: GitHub Pages** — Push code, site goes live free  

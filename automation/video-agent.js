@@ -47,11 +47,45 @@ const REQUIRED = [
   'ytChannelId',
 ];
 
+const ENV_VAR_MAPPING = {
+  pexelsApiKey: 'PEXELS_API_KEY',
+  logoPath: 'FORGEFINDS_LOGO_PATH',
+  openAiKey: 'OPENAI_API_KEY',
+  ytClientId: 'YT_CLIENT_ID',
+  ytClientSecret: 'YT_CLIENT_SECRET',
+  ytRefreshToken: 'YT_REFRESH_TOKEN',
+  ytChannelId: 'YT_CHANNEL_ID',
+};
+
+const SETUP_GUIDE_URLS = {
+  pexelsApiKey: 'https://www.pexels.com/api/',
+  openAiKey: 'https://platform.openai.com/api-keys',
+  ytClientId: 'See SETUP.md for YouTube OAuth setup instructions',
+  ytClientSecret: 'See SETUP.md for YouTube OAuth setup instructions',
+  ytRefreshToken: 'Run: npm run youtube:refresh-token (see SETUP.md)',
+  ytChannelId: 'YouTube Studio → Settings → Channel → Advanced settings',
+};
+
 function assertEnv() {
   const missing = REQUIRED.filter(k => !CONFIG[k]);
   if (missing.length) {
-    console.error('Missing required env vars:', missing.join(', '));
-    console.error('Add them to .env (use .env.example as a guide).');
+    console.error('\n❌ Missing Required Credentials\n');
+    console.error('The video upload feature requires the following environment variables:\n');
+    
+    missing.forEach(key => {
+      const envVar = ENV_VAR_MAPPING[key];
+      const guide = SETUP_GUIDE_URLS[key];
+      console.error(`  • ${envVar}`);
+      if (guide) {
+        console.error(`    → ${guide}`);
+      }
+    });
+    
+    console.error('\n📋 How to Fix:');
+    console.error('  1. Copy .env.example to .env');
+    console.error('  2. Fill in the missing credentials above');
+    console.error('  3. See SETUP.md for detailed setup instructions');
+    console.error('\n💡 Note: Video upload is optional. The site works fine without it.\n');
     process.exit(1);
   }
 }
@@ -238,7 +272,30 @@ async function getYoutubeAccessToken() {
 
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(`YouTube token error: ${res.status} ${err}`);
+    const errObj = (() => {
+      try { return JSON.parse(err); } catch { return null; }
+    })();
+    
+    console.error('\n❌ YouTube Authentication Failed\n');
+    console.error(`Status: ${res.status}`);
+    
+    if (errObj?.error === 'invalid_grant') {
+      console.error('\n🔑 Invalid or Expired Refresh Token\n');
+      console.error('The YouTube refresh token is no longer valid. This typically happens when:');
+      console.error('  • The token has expired (they can expire after 6 months of inactivity)');
+      console.error('  • The OAuth consent was revoked');
+      console.error('  • The client credentials changed\n');
+      console.error('📋 How to Fix:');
+      console.error('  1. Run: npm run youtube:refresh-token');
+      console.error('  2. Follow the OAuth flow to generate a new refresh token');
+      console.error('  3. Update YT_REFRESH_TOKEN in your .env or GitHub Secrets');
+      console.error('  4. See SETUP.md for detailed instructions\n');
+    } else {
+      console.error(`Error: ${err}\n`);
+      console.error('See SETUP.md for troubleshooting steps.');
+    }
+    
+    throw new Error(`YouTube authentication failed: ${errObj?.error || res.status}`);
   }
   return res.json();
 }

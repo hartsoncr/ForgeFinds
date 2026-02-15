@@ -6,7 +6,9 @@
   "scripts": {
     "scrape": "node scraper/update-deals.js && node scraper/generate-sitemap.js",
     "sitemap": "node scraper/generate-sitemap.js",
-    "video:one": "node automation/video-agent.js --one"
+    "video:one": "node automation/video-agent.js --one",
+    "validate": "node scripts/validate-credentials.js",
+    "youtube:refresh-token": "node scripts/get-yt-refresh-token.js"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.12",
