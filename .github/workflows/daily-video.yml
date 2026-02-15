@@ -9,6 +9,7 @@ on:
 jobs:
   check-credentials:
     runs-on: ubuntu-latest
+    permissions: {}  # No permissions needed for credential checking
     outputs:
       has-credentials: ${{ steps.check.outputs.has-credentials }}
 
@@ -46,6 +47,8 @@ jobs:
     needs: check-credentials
     if: needs.check-credentials.outputs.has-credentials == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Needed to commit and push updated posted.json
 
     steps:
       - name: Checkout repository
@@ -93,6 +96,7 @@ jobs:
     needs: check-credentials
     if: needs.check-credentials.outputs.has-credentials == 'false'
     runs-on: ubuntu-latest
+    permissions: {}  # No permissions needed for notification
 
     steps:
       - name: Notify skipped
